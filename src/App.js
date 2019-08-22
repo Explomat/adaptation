@@ -1,26 +1,44 @@
-import React from 'react';
-import logo from './logo.svg';
+import React, { Component } from 'react';
+import AdaptationList from './app/adaptations';
+import CuratorList from './app/curators';
+import ManagerList from './app/managers';
+import { connect } from 'react-redux';
+import { Route } from 'react-router-dom';
 import './App.css';
 
-function App() {
-  return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
-  );
+class App extends Component {
+
+	render() {
+		const { ui } = this.props;
+
+		if (ui.error){
+			return (
+				<div>Error</div>
+			);
+		}
+
+		return ui.isLoading ? (
+				<div>Loading</div>
+			) : (
+			<div className='app'>
+				<Route exact path='/' render={() => {
+					return (
+						<div>
+							<AdaptationList />
+							<CuratorList />
+							<ManagerList />
+						</div>
+					)
+				}} />
+			</div>
+		);
+	}
 }
 
-export default App;
+function mapStateToProps(state){
+	return {
+		ui: state.ui
+	}
+}
+
+export default connect(mapStateToProps)(App);
