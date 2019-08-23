@@ -18,11 +18,12 @@ function get_Adaptations(queryObjects){
 	function toResponse(crdoc){
 		var currentStep = Adaptation.getCurrentStep(crdoc.DocID);
 		var urole = User.getRole(curUserID, crdoc.DocID);
-		var uactions = User.getActionsByRole(urole, currentStep.id);
+		var uactions = User.getActionsByRole(urole, currentStep.step_id);
 
 		var data = Adaptation.newObject(crdoc);
 		data.meta = {
-			actions: uactions
+			actions: uactions,
+			allow_edit_tasks: (Int(currentStep.order_number) == 1)
 		}
 		return data;
 	}
@@ -43,8 +44,10 @@ function get_Adaptations(queryObjects){
 		}
 	}
 
-	var tutorId = queryObjects.HasProperty('tutor_id') ? Trim(queryObjects.tutor_id) : undefined;
-	if (tutorId != undefined){
+	
+	var isTutor = queryObjects.HasProperty('is_tutor') ? Trim(queryObjects.is_tutor) : undefined;
+	if (isTutor == 'true'){
+		var tutorId = queryObjects.HasProperty('tutor_id') ? Trim(queryObjects.tutor_id) : curUserID;
 		var bossTypes = User.getManagerTypes();
 		var q = XQuery("sql: \n\
 			select \n\
@@ -89,6 +92,11 @@ function get_Curators(queryObjects){
 	var urole = User.getRole(curUserID);
 	var curators = Adaptation.getCurators(curUserID, urole);
 	return Utils.toJSON(Utils.setSuccess(curators));
+}
+
+function get_Users(queryObjects){
+	var user = User.newObject(curUserID);
+	return Utils.toJSON(Utils.setSuccess(user));
 }
 
 function post_Task(queryObjects){

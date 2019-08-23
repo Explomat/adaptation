@@ -30,7 +30,17 @@ const request = action_name => {
 				},
 				...config
 			}).then(r => r.json());
-		}
+		},
+		delete: (data, config) => {
+			return fetch(_url, {
+				method: 'DELETE',
+				body: JSON.stringify(data),
+				headers: {
+					'Content-Type': 'application/json'
+				},
+				...config
+			}).then(r => r.json());
+		},
 	}
 }
 

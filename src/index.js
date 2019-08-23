@@ -1,4 +1,3 @@
-
 import 'react-app-polyfill/ie9';
 import 'react-app-polyfill/stable';
 
@@ -19,7 +18,7 @@ const store = configureStore({
 
 const render = () => (
 	<Provider store={store}>
-		<Router>
+		<Router basename='/' hashType='noslash'>
 			<App />
 		</Router>
 	</Provider>

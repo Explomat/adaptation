@@ -1,8 +1,10 @@
 import React, { Component } from 'react';
-import AdaptationList from './app/adaptations';
-import CuratorList from './app/curators';
-import ManagerList from './app/managers';
+import AdaptationView from './app/adaptation/adaptation';
+import Adaptation from './app/adaptation';
+import Curator from './app/curator';
+import Manager from './app/manager';
 import { connect } from 'react-redux';
+import { getUser } from './appActions';
 import { Route } from 'react-router-dom';
 import './App.css';
 
@@ -24,12 +26,14 @@ class App extends Component {
 				<Route exact path='/' render={() => {
 					return (
 						<div>
-							<AdaptationList />
-							<CuratorList />
-							<ManagerList />
+							<Adaptation />
+							<Curator />
+							<Manager />
 						</div>
 					)
 				}} />
+				<Route exact path='/adaptation/:id' component={AdaptationView}/>
+				<Route exact path='/curators/:id' component={Curator}/>
 			</div>
 		);
 	}
@@ -37,8 +41,9 @@ class App extends Component {
 
 function mapStateToProps(state){
 	return {
-		ui: state.ui
+		ui: state.ui,
+		user: state.user
 	}
 }
 
-export default connect(mapStateToProps)(App);
+export default connect(mapStateToProps, { getUser })(App);

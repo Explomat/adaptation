@@ -5,7 +5,8 @@ function getCurrentStep(crid){
 			ca.id, \n\
 			ca.collaborator_id, \n\
 			ca.object_id, \n\
-			ca.step_id \n\
+			ca.step_id, \n\
+			ast.order_number \n\
 		from \n\
 			cc_custom_adaptations ca \n\
 		inner join cc_adaptation_steps ast on ast.id = ca.step_id \n\
@@ -67,7 +68,7 @@ function createStep(prevDocId, params){
 }
 
 function getById(crId){
-	return ArrayOptFirstElem(XQuery('for $el in career_reserves where $el/id = \'' + crId + '\' return $el'));
+	return ArrayOptFirstElem(XQuery('for $el in career_reserves where $el/id = ' + crId + ' return $el'));
 }
 
 function isAccessToView(userId, doc, crid){
@@ -94,7 +95,7 @@ function getCurators(userId, userRole){
 	// если админ, то должен видеть всех кураторов
 	return XQuery("sql: \n\
 		select \n\
-			distinct(c.career_reserve_id), \n\
+			c.career_reserve_id, \n\
 			cs.id tutor_id, \n\
 			cs.fullname, \n\
 			cs.position_name, \n\
@@ -102,20 +103,24 @@ function getCurators(userId, userRole){
 		from ( \n\
 			select \n\
 				c.career_reserve_id, \n\
-				t.p.query('boss_type_id').value('.','varchar(50)') boss_type_id, \n\
-				t.p.query('person_id').value('.','varchar(50)') tutor_id \n\
+				t.p.query('person_id').value('.','varchar(50)') tutor_id, \n\
+				t.p.query('boss_type_id').value('.','varchar(50)') boss_type_id \n\
 			from career_reserves crs \n\
 			inner join ( \n\
-				select crt.career_reserve_id \n\
+				select \n\
+					crt.career_reserve_id, \n\
+					crt.tutor_id \n\
 				from career_reserve_tutors crt \n\
-				where (crt.tutor_id = " + userId + " or 'admin' = '" + userRole + "') \n\ 
+				where (crt.tutor_id = " + userId + " or 'admin' = '" + userRole + "') \n\
 			) c on c.career_reserve_id = crs.id \n\
 			inner join career_reserve cr on cr.id = crs.id \n\
 			cross apply cr.data.nodes('/career_reserve/tutors/tutor') as t(p) \n\
+			where t.p.exist('person_id[text()[1] = " + userId + "]') <> 1 \n\
 		) c \n\
 		inner join boss_types bt on bt.id = c.boss_type_id \n\
 		inner join collaborators cs on cs.id = c.tutor_id \n\
-		where bt.code = '" + bossTypes.curator + "' \n\
+		where \n\
+			bt.code = '" + bossTypes.curator + "' \n\
 	");
 }
 
@@ -126,24 +131,68 @@ function newObject(param){
 		throw 'Parameter type not defined';
 	}
 
-	var id = docCr.TopElem.AddDynamicChild('id', 'integer');
-	id.Value = docCr.DocID;
+	var q = ArrayOptFirstElem(XQuery("sql: \n\
+		select \n\
+			crs.id, \n\
+			crs.name, \n\
+			crst.name status, \n\
+			crs.person_id, \n\
+			crs.person_fullname, \n\
+			crs.person_position, \n\
+			crs.start_date, \n\
+			crs.plan_readiness_date, \n\
+			crs.finish_date \n\
+		from career_reserves crs \n\
+		inner join [common.career_reserve_status_types] crst on crst.id = crs.status \n\
+		where crs.id = " + docCr.DocID + " \n\
+	"));
 
-	var person = docCr.TopElem.person_id.OptForeignElem;
-	var personFullname = docCr.TopElem.AddDynamicChild('person_fullname', 'string');
-	personFullname.Value = person.fullname;
-	var personPositionName = docCr.TopElem.AddDynamicChild('person_position_name', 'string');
-	personPositionName.Value = person.position_name;
+	var docq = {
+		id: String(q.id),
+		name: String(q.name),
+		status: String(q.status),
+		person_id: String(q.person_id),
+		person_fullname: String(q.person_fullname),
+		person_position: String(q.person_position),
+		start_date: DateNewTime(q.start_date),
+		plan_readiness_date: DateNewTime(q.plan_readiness_date),
+		finish_date:DateNewTime(q.finish_date)
+	}
+
+	docq.tasks = [];
+	docq.tutors = [];
+
+	for (el in docCr.TopElem.tasks){
+		docq.tasks.push({
+			id: String(el.id),
+			name: String(el.name),
+			status: String(el.status),
+			type: String(el.type),
+			desc: String(el.desc)
+		});
+	}
 
 	var tasks = XQuery("for $el in cc_adaptation_tasks where $el/career_reserve_id = " + docCr.DocID + " return $el");
 	for (t in tasks) {
-		var tt = ArrayOptFind(docCr.TopElem.tasks, 'This.id == \'' + t.object_id + '\'');
+		var tt = ArrayOptFind(docq.tasks, 'This.id == \'' + t.object_id + '\'');
 		if (tt != undefined) {
-			tpc = tt.AddDynamicChild('transitinal_percent_complete', 'string');
-			tpc.Value = String(t.transitinal_percent_complete);
-			fpc = tt.AddDynamicChild('final_percent_complete', 'string');
-			fpc.Value = String(t.final_percent_complete);
+			tt['transitinal_percent_complete'] = String(t.transitinal_percent_complete);
+			tt['final_percent_complete'] = String(t.final_percent_complete);
 		}
+	}
+
+	for (t in docCr.TopElem.tutors) {
+		q = ArrayOptFirstElem(XQuery("sql: \n\
+			select name \n\
+			from boss_types \n\
+			where id = " + t.boss_type_id + " \n\
+		"));
+		docq.tutors.push({
+			person_id: String(t.person_id),
+			person_fullname: String(t.person_fullname),
+			person_position_name: String(t.person_position_name),
+			boss_type_name: (q != undefined ? String(q.name) : '')
+		});
 	}
 
 	var steps = XQuery("sql: \n\
@@ -168,7 +217,7 @@ function newObject(param){
 	var mainSteps = XQuery("for $el in cc_adaptation_main_steps return $el");
 
 	return {
-		adaptation: docCr.TopElem,
+		card: docq,
 		steps: steps,
 		mainSteps: mainSteps
 	}

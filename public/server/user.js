@@ -39,14 +39,22 @@ function getActionsByRole(role, stepId){
 		inner join cc_adaptation_operations ans on ans.id = ars.operation_id \n\
 		where \n\
 			ars.role = '" + role + "'";
-	if (step != undefined){
+	if (stepId != undefined){
 		strq = strq + " and step = " + stepId
 	}
 
 	var q = XQuery("sql: " + strq);
-	for (el in strq){
-		o.push(String(el.name));
+	for (el in q){
+		o.push({
+			name: String(el.name),
+			title: String(el.title)
+		});
 	}
+	return o;
+}
+
+function newObject(userId){
+	var o = getById(userId);
 	return o;
 }
 
