@@ -1,9 +1,12 @@
-function getById(taskId){
-	return ArrayOptFirstElem(XQuery('for $el in cc_adaptation_tasks where $el/id = \'' + taskId + '\' return $el'));
+function getByTaskId(crId, taskId){
+	return ArrayOptFirstElem(XQuery('for $el in cc_adaptation_tasks where $el/career_reserve_id = ' + crId + ' and $el/object_id = \'' + taskId + '\' return $el'));
 }
 
 function create(crId, data){
-	var q = getAdaptationById(crId);
+	var Adaptation = OpenCodeLib('x-local://wt/web/vsk/portal/adaptation/server/adapt.js');
+	DropFormsCache('x-local://wt/web/vsk/portal/adaptation/server/adapt.js');
+
+	var q = Adaptation.getById(crId);
 	if (q == undefined){
 		return null;
 	}
@@ -11,7 +14,7 @@ function create(crId, data){
 	var crDoc = OpenDoc(UrlFromDocID(Int(q.id)));
 	var countChilds = ArrayCount(crDoc.TopElem.tasks);
 	var task = crDoc.TopElem.tasks.AddChild();
-	task.name = 'Задача №' + (countChilds + 1);
+	task.name = data.name;
 	task.type = 'task';
 	task.status = 'plan';
 	task.desc = data.desc;
@@ -28,7 +31,10 @@ function create(crId, data){
 }
 
 function update(crId, taskId, data){
-	var q = getAdaptationById(crId);
+	var Adaptation = OpenCodeLib('x-local://wt/web/vsk/portal/adaptation/server/adapt.js');
+	DropFormsCache('x-local://wt/web/vsk/portal/adaptation/server/adapt.js');
+
+	var q = Adaptation.getById(crId);
 	if (q == undefined){
 		return null;
 	}
@@ -41,12 +47,13 @@ function update(crId, taskId, data){
 
 	for (el in data){
 		try {
-			task[el] = data[el];
+			ch = task.OptChild(el);
+			ch.Value = data[el]
 		} catch(e) {}
 	}
 	crDoc.Save();
 
-	var customTask = getById(taskId);
+	var customTask = getByTaskId(crId, taskId);
 	if (customTask == undefined){
 		return null;
 	}
@@ -60,17 +67,23 @@ function update(crId, taskId, data){
 
 	var obj = {};
 	for (el in task){
-		obj[el] = task[el];
+		try {
+			obj.SetProperty(el.Name, String(el.Value));
+		} catch(e) {}
 	}
 	for (el in customTaskDoc.TopElem){
-		obj[el] = customTaskDoc.TopElem[el];
+		try {
+			obj.SetProperty(el.Name, String(el.Value));
+		} catch(e) {}
 	}
-
 	return obj;
 }
 
 function remove(crId, taskId){
-	var q = getAdaptationById(crId);
+	var Adaptation = OpenCodeLib('x-local://wt/web/vsk/portal/adaptation/server/adapt.js');
+	DropFormsCache('x-local://wt/web/vsk/portal/adaptation/server/adapt.js');
+
+	var q = Adaptation.getById(crId);
 	if (q == undefined){
 		return null;
 	}
@@ -80,7 +93,12 @@ function remove(crId, taskId){
 	if (task == undefined){
 		return null;
 	}
+
 	task.Delete();
-	DeleteDoc(UrlFromDocID(Int(taskId)));
+	var customTask = getByTaskId(crId, taskId);
+	if (customTask != undefined){
+		DeleteDoc(UrlFromDocID(Int(customTask.id)));
+	}
+	crDoc.Save();
 	return null;
 }

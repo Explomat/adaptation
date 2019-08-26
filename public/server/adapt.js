@@ -1,3 +1,7 @@
+function getCrByPersonId(personId){
+	return XQuery("for $el in career_reserves where $el/person_id = " + personId + " return $el");
+}
+
 
 function getCurrentStep(crid){
 	return ArrayOptFirstElem(XQuery("sql: \n\
@@ -174,7 +178,7 @@ function newObject(param){
 
 	var tasks = XQuery("for $el in cc_adaptation_tasks where $el/career_reserve_id = " + docCr.DocID + " return $el");
 	for (t in tasks) {
-		var tt = ArrayOptFind(docq.tasks, 'This.id == \'' + t.object_id + '\'');
+		tt = ArrayOptFind(docq.tasks, 'This.id == \'' + t.object_id + '\'');
 		if (tt != undefined) {
 			tt['transitinal_percent_complete'] = String(t.transitinal_percent_complete);
 			tt['final_percent_complete'] = String(t.final_percent_complete);
@@ -195,24 +199,34 @@ function newObject(param){
 		});
 	}
 
-	var steps = XQuery("sql: \n\
-		select \n\
-			cad.id, \n\
-			atp.title [type], \n\
-			cs1.fullname [collaborator], \n\
-			cs2.fullname [object], \n\
-			asp.title [step], \n\
-			ams.description [main_step] \n\
-		from \n\
-			cc_custom_adaptations cad \n\
-		inner join cc_adaptation_types atp on atp.id = cad.type_id \n\
-		inner join collaborators cs1 on cs1.id = cad.collaborator_id \n\
-		inner join collaborators cs2 on cs2.id = cad.object_id \n\
-		inner join cc_adaptation_steps asp on asp.id = cad.step_id \n\
-		inner join cc_adaptation_main_steps ams on ams.id = cad.main_step_id \n\
-		where \n\
-			cad.career_reserve_id = " + docCr.DocID + " \n\
-	");
+	var crs = getCrByPersonId(docCr.TopElem.person_id);
+	var steps = [];
+	for (el in crs){
+		s = XQuery("sql: \n\
+			select \n\
+				cad.id, \n\
+				atp.title [type], \n\
+				cs1.fullname [collaborator], \n\
+				cs2.fullname [object], \n\
+				asp.title [step], \n\
+				ams.description [main_step] \n\
+			from \n\
+				cc_custom_adaptations cad \n\
+			inner join cc_adaptation_types atp on atp.id = cad.type_id \n\
+			inner join collaborators cs1 on cs1.id = cad.collaborator_id \n\
+			inner join collaborators cs2 on cs2.id = cad.object_id \n\
+			inner join cc_adaptation_steps asp on asp.id = cad.step_id \n\
+			inner join cc_adaptation_main_steps ams on ams.id = cad.main_step_id \n\
+			where \n\
+				cad.career_reserve_id = " + el.id + " \n\
+		");
+		steps.push({
+			id: String(el.id),
+			name: String(el.name),
+			history: s
+		});
+	}
+
 
 	var mainSteps = XQuery("for $el in cc_adaptation_main_steps return $el");
 

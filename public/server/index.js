@@ -23,7 +23,7 @@ function get_Adaptations(queryObjects){
 		var data = Adaptation.newObject(crdoc);
 		data.meta = {
 			actions: uactions,
-			allow_edit_tasks: (Int(currentStep.order_number) == 1)
+			allow_edit_tasks: ((Int(currentStep.order_number) == 1) && (crdoc.TopElem.person_id == curUserID))
 		}
 		return data;
 	}
@@ -111,6 +111,7 @@ function post_Task(queryObjects){
 
 	if (taskId != undefined){
 		task = Task.update(crId, taskId, data);
+		return Utils.toJSON(Utils.setSuccess(task));
 	}
 
 	task = Task.create(crId, data);
@@ -133,7 +134,7 @@ function delete_Task(queryObjects){
 }
 
 function post_changeStep(queryObjects){
-	var crid = queryObjects.HasProperty('crid') ? Trim(queryObjects.crid) : undefined;
+	var crid = queryObjects.HasProperty('cr_id') ? Trim(queryObjects.cr_id) : undefined;
 
 	if (crid == undefined){
 		return Utils.toJSON(Utils.setError('Invalid parametres'));
@@ -153,7 +154,7 @@ function post_changeStep(queryObjects){
 	var urole = User.getRole(curUserID, crid);
 	var uactions = User.getActionsByRole(urole);
 
-	if (!ArrayOptFind(uactions, 'This.name == \'' + action + '\'')) {
+	if (ArrayOptFind(uactions, 'This.name == \'' + action + '\'') == undefined) {
 		return Utils.toJSON(Utils.setError('Unknown action for user'));
 	}
 
@@ -193,6 +194,6 @@ function post_changeStep(queryObjects){
 		step = Adaptation.createStep(currentStep.id, { collaborator_id: currentUserId, step_id: processStep.next_step });
 	}
 	
-	return Utils.toJSON(Utils.setSuccess(step));
+	return Utils.toJSON(Utils.setSuccess());
 }
 %>

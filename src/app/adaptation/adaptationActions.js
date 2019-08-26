@@ -6,6 +6,7 @@ export const constants = {
 	...createRemoteActions([
 		'FETCH_USER_ADAPTATIONS',
 		'FETCH_ADAPTATION',
+		'CHANGE_STEP',
 		'ADD_TASK',
 		'REMOVE_TASK',
 		'EDIT_TASK'
@@ -65,16 +66,14 @@ export function getAdaptation(id){
 };
 
 
-export function addTask(){
+export function addTask(data){
 	return (dispatch, getState) => {
 
 		const state = getState();
 		const cardId = state.adaptation.card.id;
 
-		request('Task')
-			.post({
-				cr_id: cardId
-			})
+		request('Task', { cr_id: cardId })
+			.post(data)
 			.then(r => r.json())
 			.then(d => {
 				dispatch({
@@ -89,21 +88,19 @@ export function addTask(){
 	}
 };
 
-export function editTask(id){
+export function updateTask(id, data){
 	return (dispatch, getState) => {
 		const state = getState();
 		const cardId = state.adaptation.card.id;
 
-		request('Task')
-			.post({
-				cr_id: cardId,
-				task_id: id
-			})
+		request('Task', { cr_id: cardId, task_id: id })
+			.post(data)
 			.then(r => r.json())
 			.then(d => {
 				dispatch({
 					type: constants.EDIT_TASK_SUCCESS,
-					payload: d.data
+					payload: d.data,
+					id
 				});
 			})
 			.catch(e => {
@@ -118,17 +115,35 @@ export function removeTask(id){
 		const state = getState();
 		const cardId = state.adaptation.card.id;
 
-		request('Task')
-			.delete({
-				cr_id: cardId,
-				task_id: id
-			})
+		request('Task', { cr_id: cardId, task_id: id })
+			.delete()
 			.then(r => r.json())
 			.then(d => {
 				dispatch({
 					type: constants.REMOVE_TASK_SUCCESS,
-					payload: d.data
+					payload: d.data,
+					id
 				});
+			})
+			.catch(e => {
+				console.error(e);
+				//dispatch(error(e.message));
+			});
+	}
+};
+
+export function changeStep(action){
+	return (dispatch, getState) => {
+		const state = getState();
+		const cardId = state.adaptation.card.id;
+
+		request('changeStep', { cr_id: cardId })
+			.post({
+				action
+			})
+			.then(r => r.json())
+			.then(d => {
+				dispatch(getAdaptation(cardId));
 			})
 			.catch(e => {
 				console.error(e);

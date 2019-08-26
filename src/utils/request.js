@@ -1,6 +1,6 @@
 
 
-export function createBaseUrl(action_name){
+export function createBaseUrl(action_name, params = {}){
 	action_name = action_name || '';
 
 	const baseUrl =
@@ -9,11 +9,13 @@ export function createBaseUrl(action_name){
 
 	window.routerId = '6727531844004172765';
 	window.serverId = '6727526001436286031';
-	return `${baseUrl}?object_id=${window.routerId}&server_id=${window.serverId}&action_name=${action_name}&r=${(new Date()).getTime()}`
+	const url = new URL(`${baseUrl}?object_id=${window.routerId}&server_id=${window.serverId}&action_name=${action_name}&r=${(new Date()).getTime()}`);
+	Object.keys(params).forEach(key => url.searchParams.append(key, params[key]));
+	return url.href;
 }
 
-const request = action_name => {
-	const _url = createBaseUrl(action_name);
+const request = (action_name, urlParams = {}) => {
+	const _url = createBaseUrl(action_name, urlParams);
 
 	return {
 		get: (params = {}, config) => {
@@ -29,7 +31,7 @@ const request = action_name => {
 					'Content-Type': 'application/json'
 				},
 				...config
-			}).then(r => r.json());
+			});
 		},
 		delete: (data, config) => {
 			return fetch(_url, {
@@ -39,7 +41,7 @@ const request = action_name => {
 					'Content-Type': 'application/json'
 				},
 				...config
-			}).then(r => r.json());
+			});
 		},
 	}
 }
