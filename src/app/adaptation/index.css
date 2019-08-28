@@ -1,3 +1,21 @@
+.adaptations{
+    margin-bottom: 30px;
+}
+
+.adaptation__steps{
+    margin-top: 20px;
+    margin-bottom: 50px;
+}
+
+.adaptation__tasks-add{
+    font-size: 30px;
+    color: rgb(245, 123, 123);
+}
+
+.task__icon{
+    font-size: 18px;
+}
+
 .adaptation__header {
 	padding: 16px 24px;
 }
@@ -37,5 +55,10 @@
 }
 
 .ant-page-header {
-    border: 1px solid rgb(235, 237, 240);
+    //border: 1px solid rgb(235, 237, 240);
+}
+
+
+.ant-steps-item-title {
+    font-size: 14px;   
 }

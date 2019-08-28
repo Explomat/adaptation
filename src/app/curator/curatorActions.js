@@ -1,51 +1,30 @@
 import createRemoteActions from '../../utils/createRemoteActions';
-//import { error } from '../appActions';
+import { error } from '../../appActions';
 import request from '../../utils/request';
 
 export const constants = {
 	...createRemoteActions([
 		'FETCH_CURATOR_ADAPTATIONS'
-	]),
-	'LOADING_CURATOR_ADAPTATIONS': 'LOADING_CURATOR_ADAPTATIONS'
+	])
 };
 
-function setLoading(isLoading){
-	return {
-		type: constants.LOADING_CURATOR_ADAPTATIONS,
-		payload: isLoading
-	}
-};
-
-export function getCuratorAdaptations(ownProps){
+export function getCuratorAdaptations(curatorId){
 	return (dispatch, getState) => {
-		dispatch(setLoading(true));
-
-		const state = getState();
 		request('Adaptations')
 			.get({
-				is_tutor: true
+				is_tutor: true,
+				tutor_id: curatorId
 			})
 			.then(r => r.json())
 			.then(d => {
-				dispatch(setLoading(false));
 				dispatch({
 					type: constants.FETCH_CURATOR_ADAPTATIONS_SUCCESS,
-					payload: d.data
+					payload: { ...d.data }
 				});
 			})
 			.catch(e => {
 				console.error(e);
-				//dispatch(error(e.message));
+				dispatch(error(e.message));
 			});
-
-		/*setTimeout(() => {
-			saveAssessmentMock({
-				status: app.steps.status,
-				manager: app.steps.manager.value
-			});
-			dispatch(getStep());
-			dispatch(setLoading(false));
-			ownProps.history.push('/profile');
-		}, 1000);*/
 	}
 };

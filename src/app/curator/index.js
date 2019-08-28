@@ -1,25 +1,38 @@
 import React, { Component } from 'react';
+import { withRouter } from 'react-router';
+import { Card, PageHeader } from 'antd';
 import AdaptationList from '../adaptation/adaptationList';
 import { connect } from 'react-redux';
 import { getCuratorAdaptations } from './curatorActions';
-import { Link } from 'react-router-dom';
 import './index.css';
 
 class Curator extends Component {
 
 	componentDidMount(){
-		this.props.getCuratorAdaptations();
+		const { match } = this.props;
+		this.props.getCuratorAdaptations(match.params.id);
 	}
 
 	render() {
-		const adaptationList = this.props.adaptationList;
+		const { adaptationList, curator_fullname, history } = this.props;
 		if (adaptationList.length === 0) {
 			return null;
 		}
 		return (
 			<div className='curators'>
-				<div>Адаптация сотрудников</div>
-				<AdaptationList list={adaptationList}/>
+				{history.location.pathname === '/' ? (
+					<Card title='Адаптация сотрудников'>
+						<AdaptationList list={adaptationList}/>
+					</Card>
+				):(
+					<PageHeader
+						onBack={history.goBack}
+						title={curator_fullname}
+					>
+						<div className='curators__tutor-header'>Адаптация сотрудников</div>
+						<AdaptationList list={adaptationList}/>
+					</PageHeader>
+				)}
 			</div>
 		);
 	}
@@ -27,8 +40,8 @@ class Curator extends Component {
 
 function mapStateToProps(state){
 	return {
-		adaptationList: state.curator.adaptationList
+		...state.curator
 	}
 }
 
-export default connect(mapStateToProps, { getCuratorAdaptations })(Curator);
+export default withRouter(connect(mapStateToProps, { getCuratorAdaptations })(Curator));

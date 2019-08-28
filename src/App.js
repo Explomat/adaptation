@@ -1,4 +1,6 @@
 import React, { Component } from 'react';
+import Loader from './components/loader';
+import ErrorAlert from './components/error';
 import AdaptationView from './app/adaptation/adaptation';
 import Adaptation from './app/adaptation';
 import Curator from './app/curator';
@@ -15,14 +17,13 @@ class App extends Component {
 
 		if (ui.error){
 			return (
-				<div>Error</div>
+				<ErrorAlert message={ui.error}/>
 			);
 		}
 
-		return ui.isLoading ? (
-				<div>Loading</div>
-			) : (
+		return (
 			<div className='app'>
+				{ui.isLoading && <Loader message='Загрузка' description='Загружаются результаты'/>}
 				<Route exact path='/' render={() => {
 					return (
 						<div>

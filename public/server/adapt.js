@@ -2,7 +2,6 @@ function getCrByPersonId(personId){
 	return XQuery("for $el in career_reserves where $el/person_id = " + personId + " return $el");
 }
 
-
 function getCurrentStep(crid){
 	return ArrayOptFirstElem(XQuery("sql: \n\
 		select \n\
@@ -99,7 +98,7 @@ function getCurators(userId, userRole){
 	// если админ, то должен видеть всех кураторов
 	return XQuery("sql: \n\
 		select \n\
-			c.career_reserve_id, \n\
+			distinct(c.career_reserve_id), \n\
 			cs.id tutor_id, \n\
 			cs.fullname, \n\
 			cs.position_name, \n\
@@ -125,6 +124,7 @@ function getCurators(userId, userRole){
 		inner join collaborators cs on cs.id = c.tutor_id \n\
 		where \n\
 			bt.code = '" + bossTypes.curator + "' \n\
+			and tutor_id <> " + userId + " \n\
 	");
 }
 
@@ -145,11 +145,33 @@ function newObject(param){
 			crs.person_position, \n\
 			crs.start_date, \n\
 			crs.plan_readiness_date, \n\
-			crs.finish_date \n\
+			crs.finish_date, \n\
+			ads.title current_step, \n\
+			ams.id main_step_id \n\
 		from career_reserves crs \n\
 		inner join [common.career_reserve_status_types] crst on crst.id = crs.status \n\
-		where crs.id = " + docCr.DocID + " \n\
+		inner join cc_custom_adaptations cas on cas.career_reserve_id = crs.id \n\
+		inner join cc_adaptation_steps ads on ads.id = cas.step_id \n\
+		inner join cc_adaptation_main_steps ams on ams.id = cas.main_step_id \n\
+		where \n\
+			crs.id = " + docCr.DocID + " \n\
+			and cas.is_active_step = 1 \n\
 	"));
+
+
+	var sd = String(q.start_date);
+	var prd = String(q.plan_readiness_date);
+	var fd = String(q.finish_date);
+
+	try {
+		sd = StrXmlDate(Date(sd));
+	} catch(e){}
+	try {
+		prd = StrXmlDate(Date(prd));
+	} catch(e){}
+	try {
+		fd = StrXmlDate(Date(fd));
+	} catch(e){}
 
 	var docq = {
 		id: String(q.id),
@@ -158,9 +180,11 @@ function newObject(param){
 		person_id: String(q.person_id),
 		person_fullname: String(q.person_fullname),
 		person_position: String(q.person_position),
-		start_date: DateNewTime(q.start_date),
-		plan_readiness_date: DateNewTime(q.plan_readiness_date),
-		finish_date:DateNewTime(q.finish_date)
+		start_date: sd,
+		plan_readiness_date: prd,
+		finish_date: fd,
+		current_step: String(q.current_step),
+		main_step_id: String(q.main_step_id)
 	}
 
 	docq.tasks = [];
@@ -209,7 +233,8 @@ function newObject(param){
 				cs1.fullname [collaborator], \n\
 				cs2.fullname [object], \n\
 				asp.title [step], \n\
-				ams.description [main_step] \n\
+				ams.description [main_step], \n\
+				cad.created_date \n\
 			from \n\
 				cc_custom_adaptations cad \n\
 			inner join cc_adaptation_types atp on atp.id = cad.type_id \n\
@@ -219,6 +244,7 @@ function newObject(param){
 			inner join cc_adaptation_main_steps ams on ams.id = cad.main_step_id \n\
 			where \n\
 				cad.career_reserve_id = " + el.id + " \n\
+			order by cad.created_date desc \n\
 		");
 		steps.push({
 			id: String(el.id),
@@ -228,7 +254,16 @@ function newObject(param){
 	}
 
 
-	var mainSteps = XQuery("for $el in cc_adaptation_main_steps return $el");
+	var mainSteps = XQuery("sql: \n\
+		select \n\
+			convert(varchar(max), ams.id) id, \n\
+			ams.description, \n\
+			ams.duration, \n\
+			ams.title, \n\
+			ams.type_id \n\
+		from cc_adaptation_main_steps ams \n\
+		order by ams.duration asc \n\
+	");
 
 	return {
 		card: docq,

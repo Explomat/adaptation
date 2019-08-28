@@ -1,11 +1,13 @@
-
+export function pureUrl(){
+	/*return process.env.NODE_ENV === 'production' ?
+			window.location.protocol + '//e-learning.vsk.ru' : window.location.protocol + '//192.168.73.37';*/
+	return `${window.location.protocol}//192.168.73.37`;
+}
 
 export function createBaseUrl(action_name, params = {}){
 	action_name = action_name || '';
 
-	const baseUrl =
-		process.env.NODE_ENV === 'production' ?
-			window.location.protocol + '//192.168.73.37/custom_web_template.html' : window.location.protocol + '//192.168.73.37/custom_web_template.html' //`${window.location.protocol}//${window.location.host}/custom_web_template.html`;
+	const baseUrl = pureUrl() + '/custom_web_template.html';
 
 	window.routerId = '6727531844004172765';
 	window.serverId = '6727526001436286031';

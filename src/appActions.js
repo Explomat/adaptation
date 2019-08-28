@@ -1,12 +1,28 @@
 import createRemoteActions from './utils/createRemoteActions';
-//import { error } from '../appActions';
 import request from './utils/request';
 
 export const constants = {
 	...createRemoteActions([
 		'FETCH_USER'
-	])
+	]),
+	'LOADING': 'LOADING',
+	'ERROR': 'ERROR'
 };
+
+export function loading(isLoading){
+	return {
+		type: constants.LOADING,
+		payload: isLoading
+	}
+};
+
+export function error(error){
+	return {
+		type: constants.ERROR,
+		payload: error
+	}
+};
+
 
 export function getUser(){
 	return (dispatch, getState) => {
@@ -21,17 +37,7 @@ export function getUser(){
 			})
 			.catch(e => {
 				console.error(e);
-				//dispatch(error(e.message));
+				dispatch(error(e.message));
 			});
-
-		/*setTimeout(() => {
-			saveAssessmentMock({
-				status: app.steps.status,
-				manager: app.steps.manager.value
-			});
-			dispatch(getStep());
-			dispatch(setLoading(false));
-			ownProps.history.push('/profile');
-		}, 1000);*/
 	}
 };

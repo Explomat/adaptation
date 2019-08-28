@@ -1,8 +1,8 @@
 import React, { Component } from 'react';
+import { Card } from 'antd';
 import AdaptationList from './adaptationList';
 import { connect } from 'react-redux';
 import { getUserAdaptations } from './adaptationActions';
-import { Link } from 'react-router-dom';
 import './index.css';
 
 class Adaptation extends Component {
@@ -12,15 +12,16 @@ class Adaptation extends Component {
 	}
 
 	render() {
-		const adaptationList = this.props.adaptationList;
+		const { adaptationList } = this.props;
 		if (adaptationList.length === 0) {
 			return null;
 		}
 
 		return (
 			<div className='adaptations'>
-				<div>Моя адаптация</div>
-				<AdaptationList list={adaptationList}/>
+				<Card title='Моя адаптация'>
+					<AdaptationList list={adaptationList}/>
+				</Card>
 			</div>
 		);
 	}

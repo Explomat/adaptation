@@ -1,4 +1,5 @@
 import React, { Component } from 'react';
+import { Card } from 'antd';
 import CuratorList from './curatorList';
 import { connect } from 'react-redux';
 import { getCurators } from './managerActions';
@@ -17,8 +18,9 @@ class ManagerList extends Component {
 		}
 		return (
 			<div className='curators'>
-				<div>Мои кураторы</div>
-				<CuratorList list={curatorList}/>
+				<Card title='Мои кураторы'>
+					<CuratorList list={curatorList}/>
+				</Card>
 			</div>
 		);
 	}

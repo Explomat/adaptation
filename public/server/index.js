@@ -1,6 +1,4 @@
 <%//Server.Execute(AppDirectoryPath() + '/wt/web/include/access_init.html');
-curUserID = 6719948502038810952;
-
 var Adaptation = OpenCodeLib('x-local://wt/web/vsk/portal/adaptation/server/adapt.js');
 DropFormsCache('x-local://wt/web/vsk/portal/adaptation/server/adapt.js');
 
@@ -48,6 +46,10 @@ function get_Adaptations(queryObjects){
 	var isTutor = queryObjects.HasProperty('is_tutor') ? Trim(queryObjects.is_tutor) : undefined;
 	if (isTutor == 'true'){
 		var tutorId = queryObjects.HasProperty('tutor_id') ? Trim(queryObjects.tutor_id) : curUserID;
+		if (tutorId == 'undefined') {
+			tutorId = curUserID;
+		}
+
 		var bossTypes = User.getManagerTypes();
 		var q = XQuery("sql: \n\
 			select \n\
@@ -69,10 +71,15 @@ function get_Adaptations(queryObjects){
 			) c \n\
 			inner join boss_types bt on bt.id = c.boss_type_id \n\
 			where \n\
-				c.tutor_id = " + tutorId + " \n\
+				c.tutor_id = " + Int(tutorId) + " \n\
 				and bt.code = '" + bossTypes.curator + "' \n\
 		");
-		return Utils.toJSON(Utils.setSuccess(q));
+
+		var ucurator = User.getById(Int(tutorId));
+		return Utils.toJSON(Utils.setSuccess({
+			cards: q,
+			curator_fullname: String(ucurator.fullname)
+		}));
 	}
 
 	var q = XQuery("sql: \n\
@@ -95,7 +102,8 @@ function get_Curators(queryObjects){
 }
 
 function get_Users(queryObjects){
-	var user = User.newObject(curUserID);
+	var userId = queryObjects.HasProperty('user_id') ? Trim(queryObjects.user_id) : curUserID;
+	var user = User.newObject(userId);
 	return Utils.toJSON(Utils.setSuccess(user));
 }
 

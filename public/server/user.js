@@ -40,7 +40,7 @@ function getActionsByRole(role, stepId){
 		where \n\
 			ars.role = '" + role + "'";
 	if (stepId != undefined){
-		strq = strq + " and step = " + stepId
+		strq = strq + " and step = " + Int(stepId)
 	}
 
 	var q = XQuery("sql: " + strq);

@@ -1,5 +1,5 @@
 import createRemoteActions from '../../utils/createRemoteActions';
-//import { error } from '../appActions';
+import { error } from '../../appActions';
 import request from '../../utils/request';
 
 export const constants = {
@@ -10,26 +10,15 @@ export const constants = {
 		'ADD_TASK',
 		'REMOVE_TASK',
 		'EDIT_TASK'
-	]),
-	'LOADING_ADAPTATION': 'LOADING_ADAPTATION'
-};
-
-function setLoading(isLoading){
-	return {
-		type: constants.LOADING_ADAPTATION,
-		payload: isLoading
-	}
+	])
 };
 
 export function getUserAdaptations(ownProps){
 	return (dispatch, getState) => {
-		dispatch(setLoading(true));
-
 		request('Adaptations')
 			.get()
 			.then(r => r.json())
 			.then(d => {
-				dispatch(setLoading(false));
 				dispatch({
 					type: constants.FETCH_USER_ADAPTATIONS_SUCCESS,
 					payload: d.data
@@ -37,14 +26,14 @@ export function getUserAdaptations(ownProps){
 			})
 			.catch(e => {
 				console.error(e);
-				//dispatch(error(e.message));
+				dispatch(error(e.message));
 			});
 	}
 };
 
 export function getAdaptation(id){
 	return (dispatch, getState) => {
-		dispatch(setLoading(true));
+		//dispatch(loading(true));
 
 		request('Adaptations')
 			.get({
@@ -52,7 +41,7 @@ export function getAdaptation(id){
 			})
 			.then(r => r.json())
 			.then(d => {
-				dispatch(setLoading(false));
+				//dispatch(loading(false));
 				dispatch({
 					type: constants.FETCH_ADAPTATION_SUCCESS,
 					payload: d.data
@@ -60,7 +49,7 @@ export function getAdaptation(id){
 			})
 			.catch(e => {
 				console.error(e);
-				//dispatch(error(e.message));
+				dispatch(error(e.message));
 			});
 	}
 };
@@ -83,7 +72,7 @@ export function addTask(data){
 			})
 			.catch(e => {
 				console.error(e);
-				//dispatch(error(e.message));
+				dispatch(error(e.message));
 			});
 	}
 };
@@ -105,7 +94,7 @@ export function updateTask(id, data){
 			})
 			.catch(e => {
 				console.error(e);
-				//dispatch(error(e.message));
+				dispatch(error(e.message));
 			});
 	}
 };
@@ -127,7 +116,7 @@ export function removeTask(id){
 			})
 			.catch(e => {
 				console.error(e);
-				//dispatch(error(e.message));
+				dispatch(error(e.message));
 			});
 	}
 };
@@ -147,7 +136,7 @@ export function changeStep(action){
 			})
 			.catch(e => {
 				console.error(e);
-				//dispatch(error(e.message));
+				dispatch(error(e.message));
 			});
 	}
 };

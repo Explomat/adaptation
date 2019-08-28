@@ -11,3 +11,46 @@ code {
   font-family: source-code-pro, Menlo, Monaco, Consolas, "Courier New",
     monospace;
 }
+
+
+body {
+	margin: 0;
+	padding: 0;
+	font-family: Roboto, Arial,Helvetica, sans-serif;
+}
+
+#root {
+	max-width: 1050px;
+}
+
+.dot {
+	content: '';
+	height: 6px;
+	width: 6px;
+	background-color: #bbb;
+	border-radius: 50%;
+	display: inline-block;
+	margin: 0 4px;
+}
+
+.adaptation__date {
+	color: rgba(0, 0, 0, 0.45);
+    font-size: 13px;
+    line-height: 22px;
+    border: 1px solid rgba(0, 0, 0, 0.45);
+    padding: 2px 4px;
+    border-radius: 6px;
+}
+
+.ant-card-head-title {
+  display: inline-block;
+  padding-right: 12px;
+  color: rgba(0, 0, 0, 0.85);
+  font-weight: bold;
+  font-size: 15px;
+  line-height: 1.4;
+}
+
+.ant-card-head{
+  background-color: #f9fafb;
+}

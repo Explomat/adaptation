@@ -47,18 +47,16 @@ class Task extends Component {
 		const { removeTask } = this.props;
 		const { isShowModal, name, desc } = this.state;
 		return (
-			<div>
-				<List.Item
-					actions={allow_edit_tasks ? [
-						<Icon type='edit' onClick={this.handleToggleModal}/>,
-						<Icon type='delete' onClick={() => removeTask(id)}/>
-					] : []}
-				>
-					 <List.Item.Meta
-					 	title={name}
-					 	description={desc}
-					 />
-				</List.Item>
+			<List.Item
+				actions={allow_edit_tasks ? [
+					<Icon className='task__icon' type='edit' onClick={this.handleToggleModal}/>,
+					<Icon className='task__icon' type='delete' onClick={() => removeTask(id)}/>
+				] : []}
+			>
+				 <List.Item.Meta
+				 	title={name}
+				 	description={desc}
+				 />
 				<Modal
 					title='Редактирование'
 					visible={isShowModal}
@@ -69,7 +67,7 @@ class Task extends Component {
 					<div style={{ margin: '24px 0' }} />
 					<Input.TextArea placeholder='Описание' value={desc} autosize={{ minRows: 3}} onChange={this.handleChangeDesc}/>
 				</Modal>
-			</div>
+			</List.Item>
 		);
 	}
 }
