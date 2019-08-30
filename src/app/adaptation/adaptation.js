@@ -3,6 +3,7 @@ import { withRouter } from 'react-router';
 import { List, Icon, Button, Modal, Input, PageHeader, Row, Col, Steps, Card } from 'antd';
 import Task from './task';
 import { pureUrl } from '../../utils/request';
+import { renderDate } from '../../utils/date';
 import { connect } from 'react-redux';
 import { getAdaptation, changeStep, addTask, updateTask, removeTask } from './adaptationActions';
 import './index.css';
@@ -16,30 +17,42 @@ const UserDescription = ({ ...props }) => (
 	</Col>
 );
 
-const renderDate = dateString => new Date(dateString).toLocaleDateString();
-
 class AdaptationView extends Component {
 
 	constructor(props){
 		super(props);
 
 		this.state = {
-			isShowModal: false,
+			isShowModalTask: false,
+			isShowModalComment: false,
+			comment: '',
 			taskName: '',
 			taskDesc: ''
 		}
 
-		this.handleToggleModal = this.handleToggleModal.bind(this);
+		this.currentAction = null;
+		this.handleToggleTaskModal = this.handleToggleTaskModal.bind(this);
 		this.handleAddTask = this.handleAddTask.bind(this);
 		this.handleChangeTaskName = this.handleChangeTaskName.bind(this);
 		this.handleChangeTaskDesc = this.handleChangeTaskDesc.bind(this);
+		this.handleChangeStep = this.handleChangeStep.bind(this);
+		this.handeAction = this.handeAction.bind(this);
+		this.handleToggleCommentModal = this.handleToggleCommentModal.bind(this);
+		this.handleChangeComment = this.handleChangeComment.bind(this);
 	}
 
-	handleToggleModal(){
+	handleToggleTaskModal(){
 		this.setState({
-			isShowModal: !this.state.isShowModal,
+			isShowModalTask: !this.state.isShowModalTask,
 			taskName: '',
 			taskDesc: ''
+		});
+	}
+
+	handleToggleCommentModal(){
+		this.setState({
+			isShowModalComment: !this.state.isShowModalComment,
+			comment: ''
 		});
 	}
 
@@ -51,6 +64,27 @@ class AdaptationView extends Component {
 		this.setState({ taskDesc: value });
 	}
 
+	handleChangeComment ({ target: { value } }) {
+		this.setState({ comment: value });
+	}
+
+	handeAction(action){
+		const { changeStep } = this.props;
+		if (action.allow_additional_data === 'true'){
+			this.currentAction = action;
+			this.handleToggleCommentModal();
+		} else {
+			changeStep(action);
+		}
+	}
+
+	handleChangeStep(isComment){
+		const { changeStep } = this.props;
+		const comment = isComment ? this.state.comment : null;
+		changeStep(this.currentAction.name, comment);
+		this.handleToggleCommentModal();
+	}
+
 	handleAddTask(){
 		const { addTask } = this.props;
 		const { taskName, taskDesc } = this.state;
@@ -58,7 +92,7 @@ class AdaptationView extends Component {
 			name: taskName,
 			desc: taskDesc
 		});
-		this.handleToggleModal();
+		this.handleToggleTaskModal();
 	}
 
 	componentDidMount(){
@@ -141,6 +175,7 @@ class AdaptationView extends Component {
 												 	description={t.type}
 												 />
 												 {t.collaborator} <Icon type='arrow-right' /> {t.object}
+												 {t.data && <div className='adaptation__history-data'>Комментарий: {t.data}</div>}
 											</List.Item>
 										)
 									})}
@@ -157,7 +192,8 @@ class AdaptationView extends Component {
 	render() {
 		const { card, meta  } = this.props;
 		const { changeStep, updateTask, removeTask } = this.props;
-		const { isShowModal, taskName, taskDesc } = this.state;
+		const { isShowModalTask, taskName, taskDesc } = this.state;
+		const { isShowModalComment, comment } = this.state;
 		return (
 			<div className='adaptation'>
 				{ this.renderHeader() }
@@ -168,7 +204,7 @@ class AdaptationView extends Component {
 						title='Мои задачи'
 						extra={
 							meta.allow_edit_tasks ? (
-								<Icon className='adaptation__tasks-add' type='plus-circle' theme='filled' onClick={this.handleToggleModal}/>
+								<Icon className='adaptation__tasks-add' type='plus-circle' theme='filled' onClick={this.handleToggleTaskModal}/>
 							) : null
 						}
 					>
@@ -177,7 +213,14 @@ class AdaptationView extends Component {
 							footer={
 								meta.actions && meta.actions.map(a => {
 									return (
-										<Button key={a.name} type='primary' onClick={() => changeStep(a.name)}>{a.title}</Button>
+										<Button
+												key={a.name}
+												className='adaptation__tasks-actions'
+												type='primary'
+												onClick={() => this.handeAction(a)}
+										>
+											{a.title}
+										</Button>
 									);
 								})
 							}
@@ -197,13 +240,32 @@ class AdaptationView extends Component {
 					</Card>
 					<Modal
 						title='Создать'
-						visible={isShowModal}
+						visible={isShowModalTask}
 						onOk={this.handleAddTask}
-						onCancel={this.handleToggleModal}
+						onCancel={this.handleToggleTaskModal}
 					>
 						<Input placeholder='Название' value={taskName} onChange={this.handleChangeTaskName}/>
 						<div style={{ margin: '24px 0' }} />
 						<Input.TextArea placeholder='Описание' value={taskDesc} autosize={{ minRows: 3}} onChange={this.handleChangeTaskDesc}/>
+					</Modal>
+					<Modal
+						title='Сообщение'
+						visible={isShowModalComment}
+						onOk={() => this.handleChangeStep(true)}
+						onCancel={this.handleToggleCommentModal}
+						footer={[
+							<Button key='submit' onClick={() => this.handleChangeStep(true)}>
+								Ok
+							</Button>,
+							<Button key='cancel' onClick={this.handleToggleCommentModal}>
+								Отмена
+							</Button>,
+							<Button key='submit_wthout_comment' onClick={this.handleChangeStep}>
+								Отправить без комментария
+							</Button>
+						]}
+					>
+						<Input.TextArea placeholder='Описание' value={comment} autosize={{ minRows: 3}} onChange={this.handleChangeComment}/>
 					</Modal>
 				</div>
 				<div className='adaptation__footer'>

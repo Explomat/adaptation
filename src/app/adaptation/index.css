@@ -2,6 +2,19 @@
     margin-bottom: 30px;
 }
 
+.adaptation__task-date{
+    margin-right: 8px;
+    font-size: 12px;
+}
+
+.adaptation__history-data{
+    font-weight: bold;
+}
+
+.adaptation__tasks-actions{
+    margin-right: 16px;
+}
+
 .adaptation__steps{
     margin-top: 20px;
     margin-bottom: 50px;

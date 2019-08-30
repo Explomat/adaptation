@@ -12,7 +12,7 @@ class CuratorList extends Component {
 						return (
 							<List.Item key={l.tutor_id}>
 								<Link to={`/curators/${l.tutor_id}`}>
-									{l.fullname} <Icon type="arrow-right" /> {l.position_name} <Icon type="arrow-right" /> {l.position_parent_name}
+									{l.fullname}: {l.position_name} <Icon type='arrow-right' /> {l.position_parent_name}
 								</Link>
 								
 							</List.Item>

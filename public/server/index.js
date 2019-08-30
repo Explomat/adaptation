@@ -1,4 +1,7 @@
 <%//Server.Execute(AppDirectoryPath() + '/wt/web/include/access_init.html');
+curUserID = 6719948502038810952; // Volk
+//curUserID = 6719948317677868197 // Zayts
+//curUserID = 6719948498605842349; //Markin
 var Adaptation = OpenCodeLib('x-local://wt/web/vsk/portal/adaptation/server/adapt.js');
 DropFormsCache('x-local://wt/web/vsk/portal/adaptation/server/adapt.js');
 
@@ -13,15 +16,22 @@ DropFormsCache('x-local://wt/web/vsk/portal/adaptation/server/user.js');
 
 function get_Adaptations(queryObjects){
 
+	function isAlowEditTasks(curStep, userRole){
+		return (Int(curStep.object_id) == curUserID || userRole == 'admin');
+	}
+
 	function toResponse(crdoc){
 		var currentStep = Adaptation.getCurrentStep(crdoc.DocID);
 		var urole = User.getRole(curUserID, crdoc.DocID);
 		var uactions = User.getActionsByRole(urole, currentStep.step_id);
 
 		var data = Adaptation.newObject(crdoc);
+		var isEdit = isAlowEditTasks(currentStep, urole);
 		data.meta = {
 			actions: uactions,
-			allow_edit_tasks: ((Int(currentStep.order_number) == 1) && (crdoc.TopElem.person_id == curUserID))
+			allow_edit_tasks: (isEdit && currentStep.main_step == 'first'),
+			allow_edit_trasitional_persent_complete: (isEdit && currentStep.main_step == 'second'),
+			allow_edit_final_persent_complete: (isEdit && currentStep.main_step == 'third')
 		}
 		return data;
 	}
@@ -51,6 +61,11 @@ function get_Adaptations(queryObjects){
 		}
 
 		var bossTypes = User.getManagerTypes();
+		var tutorRoles = User.getTutorRoles(tutorId);
+		var tutorRole = queryObjects.HasProperty('tutor_role') ? Trim(queryObjects.tutor_role) : bossTypes.curator;
+		if (tutorRole == 'undefined' || tutorRole == '') {
+			tutorRole = bossTypes.curator;
+		}
 		var q = XQuery("sql: \n\
 			select \n\
 				c.id, \n\
@@ -72,13 +87,15 @@ function get_Adaptations(queryObjects){
 			inner join boss_types bt on bt.id = c.boss_type_id \n\
 			where \n\
 				c.tutor_id = " + Int(tutorId) + " \n\
-				and bt.code = '" + bossTypes.curator + "' \n\
+				and bt.code = '" + tutorRole + "' \n\
 		");
 
 		var ucurator = User.getById(Int(tutorId));
 		return Utils.toJSON(Utils.setSuccess({
 			cards: q,
-			curator_fullname: String(ucurator.fullname)
+			curator_fullname: String(ucurator.fullname),
+			tutorRoles: tutorRoles,
+			currentTutorRole: tutorRole
 		}));
 	}
 
@@ -168,27 +185,40 @@ function post_changeStep(queryObjects){
 
 	var currentStep = Adaptation.getCurrentStep(crid);
 	var personFromRole = User.getRole(currentStep.object_id, crid);
-	var processStep = Adaptation.getProcessStep(personFromRole, currentStep.step_id, action);
+	alert('personFromRole: ' + personFromRole);
+	alert('currentStep.step_id: ' + currentStep.step_id);
+	alert('action: ' + action);
 
-	if (processStep == undefined){
+	//Теперь функция getProcessSteps может вернуть несколько записей. 
+	//Т.к. у  сотрудника может не быть куратора, и он должен отправить сразу руководителю.
+	//Получаем этапы, ранжируем по номеру
+	var processSteps = Adaptation.getProcessSteps(personFromRole, currentStep.step_id, action);
+
+	//alert(tools.object_to_text(processStep, 'json'));
+	if (ArrayCount(processSteps) == 0){
 		return Utils.toJSON(Utils.setError('Next step not found'));
 	}
 
+	var processStep = null;
+	var nextUserId = null;
+	for (ps in processSteps){
+		nextUserId = Adaptation.getNextUserId(crid, ps.next_role);
+		if (nextUserId != null){
+			processStep = ps;
+			break;
+		}
+	}
+
+	if (processStep == null || nextUserId == null){
+		return Utils.toJSON(Utils.setError('Next step or next user not found'));
+	}
+
 	var currentUserId = currentStep.object_id;
-	var nextUserId = Adaptation.getNextUserId(crid, processStep.next_role);
+	//var nextUserId = Adaptation.getNextUserId(crid, processStep.next_role);
 	
 	var step = null;
-	if (action == 'transfer_for_approval') {
-		step = Adaptation.createStep(
-			currentStep.id,
-			{
-				collaborator_id: currentUserId,
-				object_id: nextUserId,
-				step_id: processStep.next_step
-			}
-		);
-	} else if (action == 'return_for_revision') {
-		var comment = data.HasProperty('comment') ? data.comment : '';
+	var comment = data.HasProperty('comment') && data.GetOptProperty('comment') != 'undefined' ? data.comment : '';
+	if (action == 'transfer_for_approval' || action == 'return_for_revision') {
 		step = Adaptation.createStep(
 			currentStep.id,
 			{

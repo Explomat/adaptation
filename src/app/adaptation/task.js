@@ -1,5 +1,6 @@
 import React, { Component } from 'react';
 import { List, Icon, Modal, Input } from 'antd';
+import { renderDate } from '../../utils/date';
 
 class Task extends Component {
 
@@ -43,18 +44,21 @@ class Task extends Component {
 	}
 
 	render() {
-		const { allow_edit_tasks, id } = this.props;
+		const { allow_edit_tasks, id, created_date } = this.props;
 		const { removeTask } = this.props;
 		const { isShowModal, name, desc } = this.state;
 		return (
-			<List.Item
+			<List.Item className='adaptation__task'
 				actions={allow_edit_tasks ? [
 					<Icon className='task__icon' type='edit' onClick={this.handleToggleModal}/>,
 					<Icon className='task__icon' type='delete' onClick={() => removeTask(id)}/>
 				] : []}
 			>
 				 <List.Item.Meta
-				 	title={name}
+				 	title={<span>
+				 			<span className='adaptation__date adaptation__task-date'>{renderDate(created_date)}</span>
+				 			<span>{name}</span>
+				 		</span>}
 				 	description={desc}
 				 />
 				<Modal

@@ -1,16 +1,41 @@
 import React, { Component } from 'react';
 import { withRouter } from 'react-router';
-import { Card, PageHeader } from 'antd';
+import { Card, PageHeader, Select } from 'antd';
 import AdaptationList from '../adaptation/adaptationList';
 import { connect } from 'react-redux';
-import { getCuratorAdaptations } from './curatorActions';
+import { getTutorAdaptations } from './curatorActions';
 import './index.css';
 
 class Curator extends Component {
 
+	constructor(props){
+		super(props);
+
+		this.handleChangeTutorRole = this.handleChangeTutorRole.bind(this);
+	}
+
 	componentDidMount(){
+		const { match, currentTutorRole } = this.props;
+		this.props.getTutorAdaptations(match.params.id, currentTutorRole);
+	}
+
+	handleChangeTutorRole(value){
 		const { match } = this.props;
-		this.props.getCuratorAdaptations(match.params.id);
+		this.props.getTutorAdaptations(match.params.id, value);
+	}
+
+	renderTutorRoles(){
+		const { tutorRoles, currentTutorRole } = this.props;
+
+		return (
+			<Select defaultValue={currentTutorRole} onChange={this.handleChangeTutorRole}>
+				{tutorRoles && tutorRoles.map(t => {
+					return (
+						<Select.Option key={t.code} value={t.code}>{t.name}</Select.Option>
+					);
+				})}
+			</Select>
+		);
 	}
 
 	render() {
@@ -21,7 +46,10 @@ class Curator extends Component {
 		return (
 			<div className='curators'>
 				{history.location.pathname === '/' ? (
-					<Card title='Адаптация сотрудников'>
+					<Card
+						title='Адаптация сотрудников'
+						extra={this.renderTutorRoles()}
+					>
 						<AdaptationList list={adaptationList}/>
 					</Card>
 				):(
@@ -44,4 +72,4 @@ function mapStateToProps(state){
 	}
 }
 
-export default withRouter(connect(mapStateToProps, { getCuratorAdaptations })(Curator));
+export default withRouter(connect(mapStateToProps, { getTutorAdaptations })(Curator));

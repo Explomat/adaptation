@@ -33,8 +33,9 @@ function getActionsByRole(role, stepId){
 	var o = [];
 	var strq = " \n\
 		select \n\
-			ans.name, \n\
-			ans.title \n\
+			distinct(ans.name), \n\
+			ans.title, \n\
+			ans.allow_additional_data \n\
 		from cc_adaptation_role_operations ars \n\
 		inner join cc_adaptation_operations ans on ans.id = ars.operation_id \n\
 		where \n\
@@ -47,10 +48,36 @@ function getActionsByRole(role, stepId){
 	for (el in q){
 		o.push({
 			name: String(el.name),
-			title: String(el.title)
+			title: String(el.title),
+			allow_additional_data: String(el.allow_additional_data)
 		});
 	}
 	return o;
+}
+
+function getTutorRoles(tutorId, role){
+	var strq = " \n\
+		select \n\
+			distinct(bt.code), \n\
+			bt.name \n\
+		from ( \n\
+			select \n\
+				t.p.query('boss_type_id').value('.','varchar(50)') boss_type_id, \n\
+				t.p.query('person_id').value('.','varchar(50)') tutor_id \n\
+			from  \n\
+				career_reserves crs \n\
+			inner join career_reserve cr on cr.id = crs.id \n\
+			cross apply cr.data.nodes('/career_reserve/tutors/tutor') as t(p) \n\
+		) c \n\
+		inner join boss_types bt on bt.id = c.boss_type_id \n\
+		where \n\
+			c.tutor_id = " + tutorId + " \n\
+	";
+	if (role != undefined){
+		strq = strq + " and and bt.code = '" + role + "'"
+	}
+
+	return XQuery("sql: " + strq);
 }
 
 function newObject(userId){

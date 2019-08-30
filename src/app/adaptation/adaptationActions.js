@@ -121,14 +121,15 @@ export function removeTask(id){
 	}
 };
 
-export function changeStep(action){
+export function changeStep(action, comment){
 	return (dispatch, getState) => {
 		const state = getState();
 		const cardId = state.adaptation.card.id;
 
 		request('changeStep', { cr_id: cardId })
 			.post({
-				action
+				action,
+				comment
 			})
 			.then(r => r.json())
 			.then(d => {

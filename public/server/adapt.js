@@ -9,28 +9,33 @@ function getCurrentStep(crid){
 			ca.collaborator_id, \n\
 			ca.object_id, \n\
 			ca.step_id, \n\
-			ast.order_number \n\
+			ast.order_number, \n\
+			ams.title as main_step \n\
 		from \n\
 			cc_custom_adaptations ca \n\
 		inner join cc_adaptation_steps ast on ast.id = ca.step_id \n\
+		inner join cc_adaptation_main_steps ams on ams.id = ca.main_step_id \n\
 		where \n\
 			ca.career_reserve_id = " + crid + " \n\
 			and ca.is_active_step = 1 \n\
 	"));
 }
 
-function getProcessStep(role, stepId, action){
-	return ArrayOptFirstElem(XQuery("sql: \n\
+function getProcessSteps(role, stepId, action){
+	return XQuery("sql: \n\
 		select \n\
-			ars.* \n\
+			ars.*, \n\
+			ast.order_number next_step_order_number \n\
 		from \n\
 			cc_adaptation_role_operations ars \n\
 		inner join cc_adaptation_operations aps on aps.id = ars.operation_id \n\
+		inner join cc_adaptation_steps ast on ast.id = ars.next_step \n\
 		where \n\
 			ars.role = '" + role + "' \n\
 			and ars.step = " + stepId + " \n\
 			and aps.name = '" + action + "' \n\
-	"));
+		order by ast.order_number asc \n\
+	");
 }
 
 
@@ -60,6 +65,7 @@ function createStep(prevDocId, params){
 	doc.TopElem.AssignElem(caDoc.TopElem);
 	doc.TopElem.created_date = new Date();
 	doc.TopElem.is_active_step = true;
+	doc.TopElem.data = null;
 
 	for (el in params){
 		child = doc.TopElem.OptChild(el);
@@ -204,8 +210,23 @@ function newObject(param){
 	for (t in tasks) {
 		tt = ArrayOptFind(docq.tasks, 'This.id == \'' + t.object_id + '\'');
 		if (tt != undefined) {
-			tt['transitinal_percent_complete'] = String(t.transitinal_percent_complete);
-			tt['final_percent_complete'] = String(t.final_percent_complete);
+			tt['achieved_result'] = String(t.achieved_result); //достигнутый результат
+			tt['expected_result'] = String(t.expected_result); //ожидаемый результат
+			try {
+				tt['manager_assessment'] = tring(t.manager_assessment.OptForeignElem.name);
+			} catch(e) {
+				tt['manager_assessment'] = '';
+			}
+			try {
+				tt['collaborator_assessment'] = String(t.collaborator_assessment.OptForeignElem.name);
+			} catch(e) {
+				tt['collaborator_assessment'] = '';
+			}
+			try {
+				tt['created_date'] = StrXmlDate(Date(t.created_date));
+			} catch(e) {
+				tt['created_date'] = '';
+			}	
 		}
 	}
 
@@ -234,7 +255,8 @@ function newObject(param){
 				cs2.fullname [object], \n\
 				asp.title [step], \n\
 				ams.description [main_step], \n\
-				cad.created_date \n\
+				cad.created_date, \n\
+				cad.data \n\
 			from \n\
 				cc_custom_adaptations cad \n\
 			inner join cc_adaptation_types atp on atp.id = cad.type_id \n\

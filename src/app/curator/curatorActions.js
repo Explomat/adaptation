@@ -8,12 +8,13 @@ export const constants = {
 	])
 };
 
-export function getCuratorAdaptations(curatorId){
+export function getTutorAdaptations(tutorId, tutorRole){
 	return (dispatch, getState) => {
 		request('Adaptations')
 			.get({
 				is_tutor: true,
-				tutor_id: curatorId
+				tutor_id: tutorId,
+				tutor_role: tutorRole
 			})
 			.then(r => r.json())
 			.then(d => {

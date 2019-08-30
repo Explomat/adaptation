@@ -12,7 +12,6 @@ function create(crId, data){
 	}
 
 	var crDoc = OpenDoc(UrlFromDocID(Int(q.id)));
-	var countChilds = ArrayCount(crDoc.TopElem.tasks);
 	var task = crDoc.TopElem.tasks.AddChild();
 	task.name = data.name;
 	task.type = 'task';
@@ -24,6 +23,7 @@ function create(crId, data){
 	customDoc.TopElem.career_reserve_id = crId;
 	customDoc.TopElem.object_id = task.id;
 	customDoc.TopElem.object_type = 'task';
+	customDoc.TopElem.created_date = new Date();
 	customDoc.BindToDb(DefaultDb);
 	customDoc.Save();
 
