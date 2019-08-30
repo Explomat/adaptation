@@ -1,7 +1,7 @@
 <%//Server.Execute(AppDirectoryPath() + '/wt/web/include/access_init.html');
-curUserID = 6719948502038810952; // Volk
+//curUserID = 6719948502038810952; // Volk
 //curUserID = 6719948317677868197 // Zayts
-//curUserID = 6719948498605842349; //Markin
+curUserID = 6719948498605842349; //Markin
 var Adaptation = OpenCodeLib('x-local://wt/web/vsk/portal/adaptation/server/adapt.js');
 DropFormsCache('x-local://wt/web/vsk/portal/adaptation/server/adapt.js');
 
@@ -52,7 +52,6 @@ function get_Adaptations(queryObjects){
 		}
 	}
 
-	
 	var isTutor = queryObjects.HasProperty('is_tutor') ? Trim(queryObjects.is_tutor) : undefined;
 	if (isTutor == 'true'){
 		var tutorId = queryObjects.HasProperty('tutor_id') ? Trim(queryObjects.tutor_id) : curUserID;
@@ -98,7 +97,6 @@ function get_Adaptations(queryObjects){
 			currentTutorRole: tutorRole
 		}));
 	}
-
 	var q = XQuery("sql: \n\
 		select \n\
 			crs.id, \n\
@@ -185,9 +183,9 @@ function post_changeStep(queryObjects){
 
 	var currentStep = Adaptation.getCurrentStep(crid);
 	var personFromRole = User.getRole(currentStep.object_id, crid);
-	alert('personFromRole: ' + personFromRole);
+	/*alert('personFromRole: ' + personFromRole);
 	alert('currentStep.step_id: ' + currentStep.step_id);
-	alert('action: ' + action);
+	alert('action: ' + action);*/
 
 	//Теперь функция getProcessSteps может вернуть несколько записей. 
 	//Т.к. у  сотрудника может не быть куратора, и он должен отправить сразу руководителю.
@@ -201,6 +199,8 @@ function post_changeStep(queryObjects){
 
 	var processStep = null;
 	var nextUserId = null;
+	/*alert('ArrayCount(processSteps): ' + (ArrayCount(processSteps)))
+	alert(tools.object_to_text(processSteps, 'json'));*/
 	for (ps in processSteps){
 		nextUserId = Adaptation.getNextUserId(crid, ps.next_role);
 		if (nextUserId != null){
@@ -210,6 +210,8 @@ function post_changeStep(queryObjects){
 	}
 
 	if (processStep == null || nextUserId == null){
+		/*alert('processStep == null:' + (processStep == null));
+		alert('nextUserId == null:' + (nextUserId == null));*/
 		return Utils.toJSON(Utils.setError('Next step or next user not found'));
 	}
 

@@ -133,10 +133,13 @@ export function changeStep(action, comment){
 			})
 			.then(r => r.json())
 			.then(d => {
+				if (d.type === 'error'){
+					throw d;
+				}
 				dispatch(getAdaptation(cardId));
 			})
 			.catch(e => {
-				console.error(e);
+				console.error(e.message);
 				dispatch(error(e.message));
 			});
 	}

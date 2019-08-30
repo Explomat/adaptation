@@ -24,7 +24,14 @@ function getCurrentStep(crid){
 function getProcessSteps(role, stepId, action){
 	return XQuery("sql: \n\
 		select \n\
-			ars.*, \n\
+			ars.id, \n\
+			ars.operation_id, \n\
+			ars.next_step, \n\
+			ars.role, \n\
+			case \n\
+			when ars.next_role is null then ars.role \n\
+			end next_role, \n\
+			ars.step, \n\
 			ast.order_number next_step_order_number \n\
 		from \n\
 			cc_adaptation_role_operations ars \n\
@@ -213,7 +220,7 @@ function newObject(param){
 			tt['achieved_result'] = String(t.achieved_result); //достигнутый результат
 			tt['expected_result'] = String(t.expected_result); //ожидаемый результат
 			try {
-				tt['manager_assessment'] = tring(t.manager_assessment.OptForeignElem.name);
+				tt['manager_assessment'] = String(t.manager_assessment.OptForeignElem.name);
 			} catch(e) {
 				tt['manager_assessment'] = '';
 			}

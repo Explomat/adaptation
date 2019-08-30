@@ -6,24 +6,19 @@ import Adaptation from './app/adaptation';
 import Curator from './app/curator';
 import Manager from './app/manager';
 import { connect } from 'react-redux';
-import { getUser } from './appActions';
+import { error } from './appActions';
 import { Route } from 'react-router-dom';
 import './App.css';
 
 class App extends Component {
 
 	render() {
-		const { ui } = this.props;
-
-		if (ui.error){
-			return (
-				<ErrorAlert message={ui.error}/>
-			);
-		}
+		const { ui, error } = this.props;
 
 		return (
 			<div className='app'>
 				{ui.isLoading && <Loader message='Загрузка' description='Загружаются результаты'/>}
+				<ErrorAlert message={ui.error} visible={ui.error} onClose={() => error(false)}/>
 				<Route exact path='/' render={() => {
 					return (
 						<div>
@@ -47,4 +42,4 @@ function mapStateToProps(state){
 	}
 }
 
-export default connect(mapStateToProps, { getUser })(App);
+export default connect(mapStateToProps, { error })(App);

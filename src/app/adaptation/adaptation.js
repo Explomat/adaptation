@@ -7,6 +7,7 @@ import { renderDate } from '../../utils/date';
 import { connect } from 'react-redux';
 import { getAdaptation, changeStep, addTask, updateTask, removeTask } from './adaptationActions';
 import './index.css';
+import 'antd/es/table/style/index.css';
 
 const UserDescription = ({ ...props }) => (
 	<Col>
@@ -74,7 +75,7 @@ class AdaptationView extends Component {
 			this.currentAction = action;
 			this.handleToggleCommentModal();
 		} else {
-			changeStep(action);
+			changeStep(action.name);
 		}
 	}
 
@@ -189,9 +190,87 @@ class AdaptationView extends Component {
 		);
 	}
 
+	renderTasks(){
+		const { card, meta, updateTask, removeTask } = this.props;
+		if (card.tasks){
+			const columns = [
+				{
+					title: 'Цели',
+					dataIndex: 'name',
+					key: 'name'
+				},
+				{
+					title: 'Ожидаемый резултат',
+					dataIndex: 'expected_result',
+					key: 'expected_result'
+				},
+				{
+					title: 'Достигнутый результат',
+					dataIndex: 'achieved_result',
+					key: 'achieved_result'
+				},
+				{
+					title: 'Оценка сотрудника',
+					dataIndex: 'collaborator_assessment',
+					key: 'collaborator_assessment'
+				},
+				{
+					title: 'Оценка руководителя',
+					dataIndex: 'manager_assessment',
+					key: 'manager_assessment'
+				}
+			];
+			return (
+				<div>
+					<div className='ant-table-wrapper'>
+						<div className='ant-spin-nested-loading'>
+							<div className='ant-table ant-table-default ant-table-scroll-position-left'>
+								<div className='ant-table-content'>
+									<div className='ant-table-body'>
+										<table>
+											<thead className='ant-table-thead'>
+												<tr>
+												{columns.map(c => {
+													return (
+														<th key={c.key}>
+															<span className='ant-table-header-column'>
+																<div>
+																	<span className='ant-table-column-title'>
+																		{c.title}
+																	</span>
+																</div>
+															</span>
+														</th>
+													);
+												})}
+												</tr>
+											</thead>
+											<tbody className='ant-table-tbody'>
+												{card.tasks.map(t => {
+													return (
+														<Task
+															key={t.id}
+															allow_edit_tasks={meta.allow_edit_tasks}
+															updateTask={updateTask}
+															removeTask={removeTask}
+															{...t}
+														/>
+													);
+												})}
+											</tbody>
+										</table>
+									</div>
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>
+			);	
+		}
+	}
+
 	render() {
 		const { card, meta  } = this.props;
-		const { changeStep, updateTask, removeTask } = this.props;
 		const { isShowModalTask, taskName, taskDesc } = this.state;
 		const { isShowModalComment, comment } = this.state;
 		return (
@@ -207,36 +286,22 @@ class AdaptationView extends Component {
 								<Icon className='adaptation__tasks-add' type='plus-circle' theme='filled' onClick={this.handleToggleTaskModal}/>
 							) : null
 						}
-					>
-						<List
-							itemLayout='horizontal'
-							footer={
-								meta.actions && meta.actions.map(a => {
-									return (
-										<Button
-												key={a.name}
-												className='adaptation__tasks-actions'
-												type='primary'
-												onClick={() => this.handeAction(a)}
-										>
-											{a.title}
-										</Button>
-									);
-								})
-							}
-						>
-							{card.tasks && card.tasks.map(t => {
+						actions={
+							meta.actions && meta.actions.map(a => {
 								return (
-									<Task
-										key={t.id}
-										allow_edit_tasks={meta.allow_edit_tasks}
-										updateTask={updateTask}
-										removeTask={removeTask}
-										{...t}
-									/>
-								)
-							})}
-						</List>
+									<Button
+											key={a.name}
+											className='adaptation__tasks-actions'
+											type='primary'
+											onClick={() => this.handeAction(a)}
+									>
+										{a.title}
+									</Button>
+								);
+							})
+						}
+					>
+						{this.renderTasks()}
 					</Card>
 					<Modal
 						title='Создать'
