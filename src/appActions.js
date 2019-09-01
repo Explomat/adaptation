@@ -22,22 +22,3 @@ export function error(error){
 		payload: error
 	}
 };
-
-
-export function getUser(){
-	return (dispatch, getState) => {
-
-		request('Users')
-			.get()
-			.then(d => {
-				dispatch({
-					type: constants.FETCH_USER_SUCCESS,
-					payload: d
-				});
-			})
-			.catch(e => {
-				console.error(e);
-				dispatch(error(e.message));
-			});
-	}
-};

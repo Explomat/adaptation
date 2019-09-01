@@ -29,7 +29,10 @@ const adaptationReducer = (state = {
 	card: {},
 	mainSteps: [],
 	meta: {},
-	steps: []
+	steps: [],
+	ui: {
+		isLoading: true
+	}
 }, action) => {
 	switch(action.type) {
 		case constants.FETCH_ADAPTATION_SUCCESS: {
@@ -54,6 +57,16 @@ const adaptationReducer = (state = {
 				card: {
 					...state.card,
 					tasks: tasksReducer(state.card.tasks, action)
+				}
+			}
+		}
+
+		case constants.LOADING_ADAPTATION: {
+			return {
+				...state,
+				ui: {
+					...state.ui,
+					isLoading: action.payload
 				}
 			}
 		}

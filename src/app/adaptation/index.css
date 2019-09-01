@@ -4,7 +4,8 @@
 
 .adaptation__task-date{
     margin-right: 8px;
-    font-size: 12px;
+    font-size: 11px !important;
+    line-height: initial !important;
 }
 
 .adaptation__history-data{

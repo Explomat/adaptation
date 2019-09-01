@@ -2,23 +2,21 @@ import { constants } from './appActions';
 
 const appReducer = (state = {
 	user: {},
-	ui: {}
+	ui: {
+		isLoading: false
+	}
 }, action) => {
 	switch(action.type) {
-		case constants.FETCH_USER_SUCCESS: {
-			return {
-				...action.payload
-			}
-		}
-
 		case constants.LOADING: {
-			return {
+			const newState = {
 				...state,
 				ui: {
 					...state.ui,
 					isLoading: action.payload
 				}
 			}
+
+			return newState;
 		}
 
 		case constants.ERROR: {

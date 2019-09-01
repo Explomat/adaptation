@@ -2,6 +2,17 @@ function getCrByPersonId(personId){
 	return XQuery("for $el in career_reserves where $el/person_id = " + personId + " return $el");
 }
 
+function getAssessments(){
+	return XQuery("sql: \n\
+		select \n\
+			convert(varchar(max), aas.id) id, \n\
+			aas.name, \n\
+			aas.description, \n\
+			aas.color \n\
+		from cc_adaptation_assessments aas \n\
+	");
+}
+
 function getCurrentStep(crid){
 	return ArrayOptFirstElem(XQuery("sql: \n\
 		select \n\
@@ -208,8 +219,7 @@ function newObject(param){
 			id: String(el.id),
 			name: String(el.name),
 			status: String(el.status),
-			type: String(el.type),
-			desc: String(el.desc)
+			type: String(el.type)
 		});
 	}
 
@@ -220,12 +230,12 @@ function newObject(param){
 			tt['achieved_result'] = String(t.achieved_result); //достигнутый результат
 			tt['expected_result'] = String(t.expected_result); //ожидаемый результат
 			try {
-				tt['manager_assessment'] = String(t.manager_assessment.OptForeignElem.name);
+				tt['manager_assessment'] = String(t.manager_assessment);
 			} catch(e) {
 				tt['manager_assessment'] = '';
 			}
 			try {
-				tt['collaborator_assessment'] = String(t.collaborator_assessment.OptForeignElem.name);
+				tt['collaborator_assessment'] = String(t.collaborator_assessment);
 			} catch(e) {
 				tt['collaborator_assessment'] = '';
 			}

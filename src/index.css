@@ -12,6 +12,9 @@ code {
     monospace;
 }
 
+label {
+  display: block;
+}
 
 body {
 	margin: 0;

@@ -60,7 +60,8 @@ function update(crId, taskId, data){
 	var customTaskDoc = OpenDoc(UrlFromDocID(Int(customTask.id)));
 	for (el in data){
 		try {
-			customTaskDoc.TopElem[el] = data[el];
+			ch = customTaskDoc.TopElem.OptChild(el);
+			ch.Value = data[el];
 		} catch(e) {}
 	}
 	customTaskDoc.Save();

@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { Icon, Modal, Input, Divider } from 'antd';
+import { Icon, Modal, Input, Divider, Select, Tag } from 'antd';
 import { renderDate } from '../../utils/date';
 
 class Task extends Component {
@@ -36,14 +36,14 @@ class Task extends Component {
 		});
 	}
 
-	handleChangeProp(propName, event) {
+	handleChangeProp(propName, value) {
 		this.setState({
-			[propName]: event.target.value
+			[propName]: value
 		});
 	}
 
 	render() {
-		const { allow_edit_tasks, id, created_date } = this.props;
+		const { meta, id, created_date } = this.props;
 		const { removeTask } = this.props;
 		const {
 			isShowModal,
@@ -53,11 +53,19 @@ class Task extends Component {
 			collaborator_assessment,
 			manager_assessment
 		} = this.state;
+
+		let defaultCollaboratorAssessment = meta.assessments.find(a => a.name === collaborator_assessment);
+		if (!defaultCollaboratorAssessment){
+			defaultCollaboratorAssessment = meta.assessments[0];
+		}
+		let defaultManagerAssessment = meta.assessments.find(a => a.name === manager_assessment);
+		if (!defaultManagerAssessment){
+			defaultManagerAssessment = meta.assessments[0];
+		}
 		return (
 			<tr className='ant-table-row ant-table-row-level-0'>
 				<td>
-					<span className='adaptation__date adaptation__task-date'>{renderDate(created_date)}</span>
-						<Divider type='vertical' />
+					<div className='adaptation__date adaptation__task-date'>{renderDate(created_date)}</div>
 					<span>{name}</span>
 				</td>
 				<td>
@@ -67,12 +75,12 @@ class Task extends Component {
 					{achieved_result}
 				</td>
 				<td>
-					{collaborator_assessment}
+					{collaborator_assessment && <Tag color={defaultCollaboratorAssessment.color}>{collaborator_assessment}</Tag>}
 				</td>
 				<td>
-					{manager_assessment}
+					{manager_assessment && <Tag color={defaultManagerAssessment.color}>{manager_assessment}</Tag>}
 				</td>
-				{allow_edit_tasks && (<td>
+				{meta.allow_edit_tasks && (<td>
 					<span>
 						<Icon className='task__icon' type='edit' onClick={this.handleToggleModal}/>
 						<Divider type='vertical' />
@@ -85,9 +93,39 @@ class Task extends Component {
 					onOk={this.handleUpdate}
 					onCancel={this.handleToggleModal}
 				>
-					<Input placeholder='Название' value={name} onChange={e => this.handleChangeProp('name', e)}/>
+					<Input placeholder='Цель' value={name} onChange={e => this.handleChangeProp('name', e.target.value)}/>
 					<div style={{ margin: '24px 0' }} />
-					{/*<Input.TextArea placeholder='Описание' value={desc} autosize={{ minRows: 3}} onChange={this.handleChangeDesc}/>*/}
+					<Input.TextArea
+						placeholder='Ожидаемый результат'
+						value={expected_result}
+						autosize={{ minRows: 3}}
+						onChange={e => this.handleChangeProp('expected_result', e.target.value)}
+					/>
+					<div style={{ margin: '24px 0' }} />
+					<Input.TextArea
+						placeholder='Достигнутый результат'
+						value={achieved_result}
+						autosize={{ minRows: 3}}
+						onChange={e => this.handleChangeProp('achieved_result', e.target.value)}
+					/>
+					<div style={{ margin: '24px 0' }} />
+					<label>Оценка сотрудника</label>
+					<Select defaultValue={defaultCollaboratorAssessment.name} onChange={value => this.handleChangeProp('collaborator_assessment', value)}>
+						{meta.assessments && meta.assessments.map(a => {
+							return (
+								<Select.Option key={a.id} value={a.name}>{a.name}</Select.Option>
+							);
+						})}
+					</Select>
+					<div style={{ margin: '24px 0' }} />
+					<label>Оценка руководителя</label>
+					<Select defaultValue={defaultManagerAssessment.name} onChange={value => this.handleChangeProp('manager_assessment', value)}>
+						{meta.assessments && meta.assessments.map(a => {
+							return (
+								<Select.Option key={a.id} value={a.name}>{a.name}</Select.Option>
+							);
+						})}
+					</Select>
 				</Modal>
 			</tr>
 		);

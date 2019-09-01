@@ -18,6 +18,9 @@ export function getTutorAdaptations(tutorId, tutorRole){
 			})
 			.then(r => r.json())
 			.then(d => {
+				if (d.error){
+					throw d;
+				}
 				dispatch({
 					type: constants.FETCH_CURATOR_ADAPTATIONS_SUCCESS,
 					payload: { ...d.data }

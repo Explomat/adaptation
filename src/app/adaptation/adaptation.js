@@ -1,11 +1,13 @@
 import React, { Component } from 'react';
 import { withRouter } from 'react-router';
-import { List, Icon, Button, Modal, Input, PageHeader, Row, Col, Steps, Card } from 'antd';
+import { List, Icon, Button, Modal, Input, PageHeader, Row, Col, Steps, Card, Select } from 'antd';
 import Task from './task';
 import { pureUrl } from '../../utils/request';
 import { renderDate } from '../../utils/date';
 import { connect } from 'react-redux';
 import { getAdaptation, changeStep, addTask, updateTask, removeTask } from './adaptationActions';
+import { loading } from '../../appActions';
+import { createBaseUrl } from '../../utils/request';
 import './index.css';
 import 'antd/es/table/style/index.css';
 
@@ -27,15 +29,19 @@ class AdaptationView extends Component {
 			isShowModalTask: false,
 			isShowModalComment: false,
 			comment: '',
-			taskName: '',
-			taskDesc: ''
+			task: {
+				name: '',
+				expected_result: '',
+				achieved_result: '',
+				collaborator_assessment: '',
+				manager_assessment: ''
+			}
 		}
 
 		this.currentAction = null;
 		this.handleToggleTaskModal = this.handleToggleTaskModal.bind(this);
 		this.handleAddTask = this.handleAddTask.bind(this);
-		this.handleChangeTaskName = this.handleChangeTaskName.bind(this);
-		this.handleChangeTaskDesc = this.handleChangeTaskDesc.bind(this);
+		this.handleChangeTaskProp = this.handleChangeTaskProp.bind(this);
 		this.handleChangeStep = this.handleChangeStep.bind(this);
 		this.handeAction = this.handeAction.bind(this);
 		this.handleToggleCommentModal = this.handleToggleCommentModal.bind(this);
@@ -45,8 +51,13 @@ class AdaptationView extends Component {
 	handleToggleTaskModal(){
 		this.setState({
 			isShowModalTask: !this.state.isShowModalTask,
-			taskName: '',
-			taskDesc: ''
+			task: {
+				name: '',
+				expected_result: '',
+				achieved_result: '',
+				collaborator_assessment: '',
+				manager_assessment: ''
+			}
 		});
 	}
 
@@ -57,12 +68,13 @@ class AdaptationView extends Component {
 		});
 	}
 
-	handleChangeTaskName ({ target: { value } }) {
-		this.setState({ taskName: value });
-	}
-
-	handleChangeTaskDesc ({ target: { value } }) {
-		this.setState({ taskDesc: value });
+	handleChangeTaskProp(propName, value) {
+		this.setState({
+			task: {
+				...this.state.task,
+				[propName]: value
+			}
+		});
 	}
 
 	handleChangeComment ({ target: { value } }) {
@@ -88,18 +100,28 @@ class AdaptationView extends Component {
 
 	handleAddTask(){
 		const { addTask } = this.props;
-		const { taskName, taskDesc } = this.state;
-		addTask({
-			name: taskName,
-			desc: taskDesc
-		});
+		const { task } = this.state;
+		addTask(task);
 		this.handleToggleTaskModal();
 	}
 
-	componentDidMount(){
+	componentWillMount(){
 		const { match, getAdaptation } = this.props;
 		getAdaptation(match.params.id);
+		//this.props.loading(true);
 	}
+
+	componentDidMount(){
+		
+		//getAdaptation(match.params.id);
+	}
+
+	/*static getDerivedStateFromProps(props, state) {
+		const { ui } = props;
+		if (ui.isLoading){
+			return null;
+		}
+	}*/
 
 	renderMainSteps(){
 		const { mainSteps, card } = this.props;
@@ -145,6 +167,11 @@ class AdaptationView extends Component {
 									<div className='term'>Статус</div>
 									<div className='detail'>{card.status}</div>
 								</div>
+							</Col>
+						</Row>
+						<Row>
+							<Col>
+								<a href={`${createBaseUrl('Report', { cr_id: card.id })}`} className='term'>Скачать отчет <Icon type='download' /></a>
 							</Col>
 						</Row>
 					</div>
@@ -250,9 +277,9 @@ class AdaptationView extends Component {
 													return (
 														<Task
 															key={t.id}
-															allow_edit_tasks={meta.allow_edit_tasks}
 															updateTask={updateTask}
 															removeTask={removeTask}
+															meta={meta}
 															{...t}
 														/>
 													);
@@ -270,9 +297,14 @@ class AdaptationView extends Component {
 	}
 
 	render() {
-		const { card, meta  } = this.props;
-		const { isShowModalTask, taskName, taskDesc } = this.state;
+		const { card, meta, ui } = this.props;
+		if (ui.isLoading){
+			return null;
+		}
+		const { isShowModalTask, task } = this.state;
 		const { isShowModalComment, comment } = this.state;
+		const defaultCollaboratorAssessment = meta.assessments && meta.assessments[0];
+		const defaultManagerAssessment = meta.assessments && meta.assessments[0];
 		return (
 			<div className='adaptation'>
 				{ this.renderHeader() }
@@ -309,9 +341,39 @@ class AdaptationView extends Component {
 						onOk={this.handleAddTask}
 						onCancel={this.handleToggleTaskModal}
 					>
-						<Input placeholder='Название' value={taskName} onChange={this.handleChangeTaskName}/>
+						<Input placeholder='Цель' value={task.name} onChange={e => this.handleChangeTaskProp('name', e.target.value)}/>
 						<div style={{ margin: '24px 0' }} />
-						<Input.TextArea placeholder='Описание' value={taskDesc} autosize={{ minRows: 3}} onChange={this.handleChangeTaskDesc}/>
+						<Input.TextArea
+							placeholder='Ожидаемый результат'
+							value={task.expected_result}
+							autosize={{ minRows: 3}}
+							onChange={e => this.handleChangeTaskProp('expected_result', e.target.value)}
+						/>
+						<div style={{ margin: '24px 0' }} />
+						<Input.TextArea
+							placeholder='Достигнутый результат'
+							value={task.achieved_result}
+							autosize={{ minRows: 3}}
+							onChange={e => this.handleChangeTaskProp('achieved_result', e.target.value)}
+						/>
+						<div style={{ margin: '24px 0' }} />
+						<label>Оценка сотрудника</label>
+						<Select defaultValue={defaultCollaboratorAssessment.name} onChange={value => this.handleChangeTaskProp('collaborator_assessment', value)}>
+							{meta.assessments && meta.assessments.map(a => {
+								return (
+									<Select.Option key={a.id} value={a.name}>{a.name}</Select.Option>
+								);
+							})}
+						</Select>
+						<div style={{ margin: '24px 0' }} />
+						<label>Оценка руководителя</label>
+						<Select defaultValue={defaultManagerAssessment.name} onChange={value => this.handleChangeTaskProp('manager_assessment', value)}>
+							{meta.assessments && meta.assessments.map(a => {
+								return (
+									<Select.Option key={a.id} value={a.name}>{a.name}</Select.Option>
+								);
+							})}
+						</Select>
 					</Modal>
 					<Modal
 						title='Сообщение'
@@ -343,9 +405,8 @@ class AdaptationView extends Component {
 
 function mapStateToProps(state){
 	return {
-		...state.adaptation,
-		ui: state.adaptation.ui
+		...state.adaptation
 	}
 }
 
-export default withRouter(connect(mapStateToProps, { getAdaptation, changeStep, addTask, updateTask, removeTask })(AdaptationView));
+export default withRouter(connect(mapStateToProps, { getAdaptation, changeStep, addTask, updateTask, removeTask, loading })(AdaptationView));

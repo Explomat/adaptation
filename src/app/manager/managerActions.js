@@ -14,6 +14,9 @@ export function getCurators(ownProps){
 			.get()
 			.then(r => r.json())
 			.then(d => {
+				if (d.error){
+					throw d;
+				}
 				dispatch({
 					type: constants.FETCH_CURATORS_SUCCESS,
 					payload: d.data

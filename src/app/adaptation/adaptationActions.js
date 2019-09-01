@@ -10,7 +10,15 @@ export const constants = {
 		'ADD_TASK',
 		'REMOVE_TASK',
 		'EDIT_TASK'
-	])
+	]),
+	'LOADING_ADAPTATION': 'LOADING_ADAPTATION'
+};
+
+export function loading(isLoading){
+	return {
+		type: constants.LOADING_ADAPTATION,
+		payload: isLoading
+	}
 };
 
 export function getUserAdaptations(ownProps){
@@ -19,6 +27,9 @@ export function getUserAdaptations(ownProps){
 			.get()
 			.then(r => r.json())
 			.then(d => {
+				if (d.error){
+					throw d;
+				}
 				dispatch({
 					type: constants.FETCH_USER_ADAPTATIONS_SUCCESS,
 					payload: d.data
@@ -33,7 +44,7 @@ export function getUserAdaptations(ownProps){
 
 export function getAdaptation(id){
 	return (dispatch, getState) => {
-		//dispatch(loading(true));
+		dispatch(loading(true));
 
 		request('Adaptations')
 			.get({
@@ -41,11 +52,14 @@ export function getAdaptation(id){
 			})
 			.then(r => r.json())
 			.then(d => {
-				//dispatch(loading(false));
+				if (d.error){
+					throw d;
+				}
 				dispatch({
 					type: constants.FETCH_ADAPTATION_SUCCESS,
 					payload: d.data
 				});
+				dispatch(loading(false));
 			})
 			.catch(e => {
 				console.error(e);
@@ -65,6 +79,9 @@ export function addTask(data){
 			.post(data)
 			.then(r => r.json())
 			.then(d => {
+				if (d.error){
+					throw d;
+				}
 				dispatch({
 					type: constants.ADD_TASK_SUCCESS,
 					payload: d.data
@@ -108,6 +125,9 @@ export function removeTask(id){
 			.delete()
 			.then(r => r.json())
 			.then(d => {
+				if (d.error){
+					throw d;
+				}
 				dispatch({
 					type: constants.REMOVE_TASK_SUCCESS,
 					payload: d.data,
