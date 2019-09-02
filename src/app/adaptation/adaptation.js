@@ -14,8 +14,8 @@ import 'antd/es/table/style/index.css';
 const UserDescription = ({ ...props }) => (
 	<Col>
 		<div className='description'>
-			<a target='__blank' href={pureUrl() + `/view_doc.html?mode=collaborator&object_id=${props.person_id}`} className='term'>{props.person_fullname}</a>
-			<div className='detail'>{props.children}</div>
+			<div className='term'>{props.children}</div>
+			<a className='detail' target='__blank' href={pureUrl() + `/view_doc.html?mode=collaborator&object_id=${props.person_id}`}>{props.person_fullname}</a>
 		</div>
 	</Col>
 );

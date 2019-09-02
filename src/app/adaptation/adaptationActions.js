@@ -27,7 +27,7 @@ export function getUserAdaptations(ownProps){
 			.get()
 			.then(r => r.json())
 			.then(d => {
-				if (d.error){
+				if (d.type === 'error'){
 					throw d;
 				}
 				dispatch({
@@ -52,7 +52,7 @@ export function getAdaptation(id){
 			})
 			.then(r => r.json())
 			.then(d => {
-				if (d.error){
+				if (d.type === 'error'){
 					throw d;
 				}
 				dispatch({
@@ -79,7 +79,7 @@ export function addTask(data){
 			.post(data)
 			.then(r => r.json())
 			.then(d => {
-				if (d.error){
+				if (d.type === 'error'){
 					throw d;
 				}
 				dispatch({
@@ -103,6 +103,9 @@ export function updateTask(id, data){
 			.post(data)
 			.then(r => r.json())
 			.then(d => {
+				if (d.type === 'error'){
+					throw d;
+				}
 				dispatch({
 					type: constants.EDIT_TASK_SUCCESS,
 					payload: d.data,
@@ -125,7 +128,7 @@ export function removeTask(id){
 			.delete()
 			.then(r => r.json())
 			.then(d => {
-				if (d.error){
+				if (d.type === 'error'){
 					throw d;
 				}
 				dispatch({

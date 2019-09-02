@@ -1,10 +1,5 @@
-import createRemoteActions from './utils/createRemoteActions';
-import request from './utils/request';
 
 export const constants = {
-	...createRemoteActions([
-		'FETCH_USER'
-	]),
 	'LOADING': 'LOADING',
 	'ERROR': 'ERROR'
 };

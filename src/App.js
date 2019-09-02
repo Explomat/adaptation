@@ -18,14 +18,14 @@ class App extends Component {
 		return (
 			<div className='app'>
 				{ui.isLoading && <Loader message='Загрузка' description='Загружаются результаты'/>}
-				<ErrorAlert message={ui.error} visible={ui.error} onClose={() => error(false)}/>
+				<ErrorAlert message={ui.error} visible={!!ui.error} onClose={() => error(false)}/>
 				<Route exact path='/' render={() => {
 					return (
-						<div>
-							<Adaptation />
-							<Curator />
-							<Manager />
-						</div>
+						[
+							<Adaptation key='adaptation'/>,
+							<Curator key='curator'/>,
+							<Manager key='manager'/>
+						]
 					)
 				}} />
 				<Route exact path='/adaptation/:id' component={AdaptationView}/>

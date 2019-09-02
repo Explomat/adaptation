@@ -406,7 +406,7 @@ function get_Report(queryObjects){
 	for(el in ats){
 		oCell = oWorksheet.Cells.GetCell('A' + rindex);
 		oCell.Value = String(el.name);
-		oCell.Style.FontColor = el.color;
+		oCell.Style.ForegroundColor = el.color;
 		setMaxColWith(oCell.Value, 0);
 		//oCell.Style.FontSize = 14;
 

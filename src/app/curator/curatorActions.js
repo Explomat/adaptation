@@ -18,7 +18,7 @@ export function getTutorAdaptations(tutorId, tutorRole){
 			})
 			.then(r => r.json())
 			.then(d => {
-				if (d.error){
+				if (d.type === 'error'){
 					throw d;
 				}
 				dispatch({
