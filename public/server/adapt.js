@@ -40,6 +40,7 @@ function getProcessSteps(role, stepId, action){
 			ars.next_step, \n\
 			ars.role, \n\
 			case \n\
+			when ars.next_role is not null then ars.next_role \n\
 			when ars.next_role is null then ars.role \n\
 			end next_role, \n\
 			ars.step, \n\
@@ -171,7 +172,8 @@ function newObject(param){
 			crs.plan_readiness_date, \n\
 			crs.finish_date, \n\
 			ads.title current_step, \n\
-			ams.id main_step_id \n\
+			ams.id main_step_id, \n\
+			ams.description as main_step \n\
 		from career_reserves crs \n\
 		inner join [common.career_reserve_status_types] crst on crst.id = crs.status \n\
 		inner join cc_custom_adaptations cas on cas.career_reserve_id = crs.id \n\
@@ -182,7 +184,7 @@ function newObject(param){
 			and cas.is_active_step = 1 \n\
 	"));
 
-
+	var startDate = q.start_date;
 	var sd = String(q.start_date);
 	var prd = String(q.plan_readiness_date);
 	var fd = String(q.finish_date);
@@ -208,6 +210,7 @@ function newObject(param){
 		plan_readiness_date: prd,
 		finish_date: fd,
 		current_step: String(q.current_step),
+		main_step: String(q.main_step),
 		main_step_id: String(q.main_step_id)
 	}
 
@@ -304,9 +307,47 @@ function newObject(param){
 		order by ams.duration asc \n\
 	");
 
+	var ms = [];
+
+	for (s in mainSteps){
+		obj = {
+			id: String(s.id),
+			description: String(s.description),
+			duration: String(s.duration),
+			title: String(s.title),
+			type_id: String(s.type_id),
+			date: StrXmlDate(Date(startDate))
+		}
+
+		if (s.duration == '0'){
+			obj.date = StrXmlDate(Date(startDate));
+		} else {
+			d = OptInt(s.duration);
+			if (d != undefined){
+				_date = new Date(startDate);
+				nextMonth = (Month(new Date(_date)) % 12) + d;
+				nextDay = Day(_date);
+				nextYear = Year(_date);
+				if (nextMonth == 1) {
+					nextYear = nextYear + 1;
+				}
+
+				if (nextMonth == 2 && nextDay > 28){
+					nextDay = 28;
+					if ((nextYear % 4) == 0) { //високосный
+						nextDay = 29;
+					}
+				}
+				obj.date = StrXmlDate(Date(nextDay + '.' + nextMonth + '.' + nextYear));
+			}
+		}
+
+		ms.push(obj);
+	}
+
 	return {
 		card: docq,
 		steps: steps,
-		mainSteps: mainSteps
+		mainSteps: ms
 	}
 }

@@ -66,7 +66,7 @@ class Task extends Component {
 			<tr className='ant-table-row ant-table-row-level-0'>
 				<td>
 					<div className='adaptation__date adaptation__task-date'>{renderDate(created_date)}</div>
-					<span>{name}</span>
+					<div>{name}</div>
 				</td>
 				<td>
 					{expected_result}

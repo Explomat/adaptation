@@ -193,7 +193,7 @@ function post_changeStep(queryObjects){
 	//Т.к. у  сотрудника может не быть куратора, и он должен отправить сразу руководителю.
 	//Получаем этапы, ранжируем по номеру
 	var processSteps = Adaptation.getProcessSteps(personFromRole, currentStep.step_id, action);
-
+	//alert('processSteps: ' + tools.object_to_text(processSteps, 'json'))
 	//alert(tools.object_to_text(processStep, 'json'));
 	if (ArrayCount(processSteps) == 0){
 		return Utils.toJSON(Utils.setError('Next step not found'));
@@ -201,8 +201,7 @@ function post_changeStep(queryObjects){
 
 	var processStep = null;
 	var nextUserId = null;
-	/*alert('ArrayCount(processSteps): ' + (ArrayCount(processSteps)))
-	alert(tools.object_to_text(processSteps, 'json'));*/
+	//alert('ArrayCount(processSteps): ' + (ArrayCount(processSteps)))
 	for (ps in processSteps){
 		nextUserId = Adaptation.getNextUserId(crid, ps.next_role);
 		if (nextUserId != null){
@@ -210,6 +209,8 @@ function post_changeStep(queryObjects){
 			break;
 		}
 	}
+
+	//alert('processStep: ' + tools.object_to_text(processStep, 'json'))
 
 	if (processStep == null || nextUserId == null){
 		/*alert('processStep == null:' + (processStep == null));

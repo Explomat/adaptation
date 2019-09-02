@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
 import { withRouter } from 'react-router';
-import { List, Icon, Button, Modal, Input, PageHeader, Row, Col, Steps, Card, Select } from 'antd';
+import { List, Icon, Button, Modal, Input, PageHeader, Row, Col, Steps, Card, Select, Tag } from 'antd';
 import Task from './task';
 import { pureUrl } from '../../utils/request';
 import { renderDate } from '../../utils/date';
@@ -129,7 +129,14 @@ class AdaptationView extends Component {
 		return (
 			<div className='adaptation__steps'>
 				<Steps progressDot current={curStepIndex}>
-					{mainSteps && mainSteps.map(s => <Steps.Step key={s.id} title={s.description} />)}
+					{mainSteps &&
+						mainSteps.map(s => (
+							<Steps.Step
+								key={s.id}
+								title={<span className='adaptation__date'>{renderDate(s.date)}</span>}
+								description={s.description}
+							/>)
+						)}
 				</Steps>
 			</div>
 		);
@@ -137,12 +144,17 @@ class AdaptationView extends Component {
 
 	renderHeader(){
 		const { card, history  } = this.props;
+		const cdate = () => 'с ' + renderDate(card.start_date) + ' ' + (card.plan_readiness_date ? `по ${renderDate(card.plan_readiness_date)}` : '');
 
-		return (
+		return (	
 			<PageHeader
 				onBack={history.goBack}
-				title={card.person_fullname}
-				extra={<span className='adaptation__date'>{'с ' + renderDate(card.start_date) + ' ' + (card.plan_readiness_date ? `по ${renderDate(card.plan_readiness_date)}` : '')}</span>}
+				title={<span>{card.person_fullname}</span>}
+				tags={<Tag color='green'>{cdate()}</Tag>}
+				extra={[
+					<div key='status' className='detail'>Статус: <span className='adaptation__status'>{card.status}</span></div>,
+					<a key='report' href={`${createBaseUrl('Report', { cr_id: card.id })}`} className='term'>Скачать отчет <Icon type='download' /></a>
+				]}
 			>
 				<div className='wrap'>
 					<div className='content padding'>
@@ -157,21 +169,8 @@ class AdaptationView extends Component {
 							<Col>
 								<div className='description'>
 									<div className='term'>Текущий этап</div>
-									<div className='detail'>{card.current_step}</div>
+									<div className='detail'>{card.main_step} / {card.current_step}</div>
 								</div>
-							</Col>
-						</Row>
-						<Row>
-							<Col>
-								<div className='description'>
-									<div className='term'>Статус</div>
-									<div className='detail'>{card.status}</div>
-								</div>
-							</Col>
-						</Row>
-						<Row>
-							<Col>
-								<a href={`${createBaseUrl('Report', { cr_id: card.id })}`} className='term'>Скачать отчет <Icon type='download' /></a>
 							</Col>
 						</Row>
 					</div>
