@@ -1,7 +1,8 @@
 <%//Server.Execute(AppDirectoryPath() + '/wt/web/include/access_init.html');
-curUserID = 6719948502038810952; // Volk
+//curUserID = 6719948502038810952; // Volk
 //curUserID = 6719948317677868197 // Zayts
 //curUserID = 6719948498605842349; //Markin
+curUserID = 6711785032659205612; //Me
 var Adaptation = OpenCodeLib('x-local://wt/web/vsk/portal/adaptation/server/adapt.js');
 DropFormsCache('x-local://wt/web/vsk/portal/adaptation/server/adapt.js');
 
@@ -22,7 +23,9 @@ function get_Adaptations(queryObjects){
 
 	function toResponse(crdoc){
 		var currentStep = Adaptation.getCurrentStep(crdoc.DocID);
+		//Utils.setError('crdoc.DocID: ' + crdoc.DocID);
 		var urole = User.getRole(curUserID, crdoc.DocID);
+		//Utils.setError('urole: ' + urole);
 		var uactions = User.getActionsByRole(urole, currentStep.step_id);
 
 		var data = Adaptation.newObject(crdoc);
@@ -32,8 +35,8 @@ function get_Adaptations(queryObjects){
 			actions: uactions,
 			assessments: ats,
 			allow_edit_tasks: (isEdit && currentStep.main_step == 'first'),
-			allow_edit_trasitional_persent_complete: (isEdit && currentStep.main_step == 'second'),
-			allow_edit_final_persent_complete: (isEdit && currentStep.main_step == 'third')
+			allow_edit_collaborator_assessment: (isEdit && currentStep.main_step == 'fourth'),
+			allow_edit_manager_assessment: (isEdit && currentStep.main_step == 'fourth')
 		}
 		return data;
 	}

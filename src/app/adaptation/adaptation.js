@@ -111,18 +111,6 @@ class AdaptationView extends Component {
 		//this.props.loading(true);
 	}
 
-	componentDidMount(){
-		
-		//getAdaptation(match.params.id);
-	}
-
-	/*static getDerivedStateFromProps(props, state) {
-		const { ui } = props;
-		if (ui.isLoading){
-			return null;
-		}
-	}*/
-
 	renderMainSteps(){
 		const { mainSteps, card } = this.props;
 		const curStepIndex = mainSteps.findIndex(s => s.id === card.main_step_id);
@@ -130,10 +118,15 @@ class AdaptationView extends Component {
 			<div className='adaptation__steps'>
 				<Steps progressDot current={curStepIndex}>
 					{mainSteps &&
-						mainSteps.map(s => (
+						mainSteps.map((s, index) => (
 							<Steps.Step
 								key={s.id}
-								title={<span className='adaptation__date'>{renderDate(s.date)}</span>}
+								title={
+									<span>
+										<span className='adaptation__date'>{renderDate(s.date)}</span>
+										{index < curStepIndex ? <Icon className='adaptation__date-check' type='check'/> : null}
+									</span>
+								}
 								description={s.description}
 							/>)
 						)}
@@ -357,7 +350,7 @@ class AdaptationView extends Component {
 						/>
 						<div style={{ margin: '24px 0' }} />
 						<label>Оценка сотрудника</label>
-						<Select defaultValue={defaultCollaboratorAssessment.name} onChange={value => this.handleChangeTaskProp('collaborator_assessment', value)}>
+						<Select disabled={!meta.allow_edit_collaborator_assessment} defaultValue={defaultCollaboratorAssessment.name} onChange={value => this.handleChangeTaskProp('collaborator_assessment', value)}>
 							{meta.assessments && meta.assessments.map(a => {
 								return (
 									<Select.Option key={a.id} value={a.name}>{a.name}</Select.Option>
@@ -366,7 +359,7 @@ class AdaptationView extends Component {
 						</Select>
 						<div style={{ margin: '24px 0' }} />
 						<label>Оценка руководителя</label>
-						<Select defaultValue={defaultManagerAssessment.name} onChange={value => this.handleChangeTaskProp('manager_assessment', value)}>
+						<Select disabled={!meta.allow_edit_manager_assessment} defaultValue={defaultManagerAssessment.name} onChange={value => this.handleChangeTaskProp('manager_assessment', value)}>
 							{meta.assessments && meta.assessments.map(a => {
 								return (
 									<Select.Option key={a.id} value={a.name}>{a.name}</Select.Option>

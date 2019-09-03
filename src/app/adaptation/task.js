@@ -110,7 +110,7 @@ class Task extends Component {
 					/>
 					<div style={{ margin: '24px 0' }} />
 					<label>Оценка сотрудника</label>
-					<Select defaultValue={defaultCollaboratorAssessment.name} onChange={value => this.handleChangeProp('collaborator_assessment', value)}>
+					<Select disabled={!meta.allow_edit_collaborator_assessment} defaultValue={defaultCollaboratorAssessment.name} onChange={value => this.handleChangeProp('collaborator_assessment', value)}>
 						{meta.assessments && meta.assessments.map(a => {
 							return (
 								<Select.Option key={a.id} value={a.name}>{a.name}</Select.Option>
@@ -119,7 +119,7 @@ class Task extends Component {
 					</Select>
 					<div style={{ margin: '24px 0' }} />
 					<label>Оценка руководителя</label>
-					<Select defaultValue={defaultManagerAssessment.name} onChange={value => this.handleChangeProp('manager_assessment', value)}>
+					<Select disabled={!meta.allow_edit_manager_assessment} defaultValue={defaultManagerAssessment.name} onChange={value => this.handleChangeProp('manager_assessment', value)}>
 						{meta.assessments && meta.assessments.map(a => {
 							return (
 								<Select.Option key={a.id} value={a.name}>{a.name}</Select.Option>

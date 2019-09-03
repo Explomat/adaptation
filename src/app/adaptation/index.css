@@ -2,6 +2,11 @@
     margin-bottom: 30px;
 }
 
+.adaptation__date-check{
+    color: #52c41a;
+    font-size: 18px;
+}
+
 .adaptation__status{
     font-weight: bold;
 }
