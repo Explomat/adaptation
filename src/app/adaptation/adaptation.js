@@ -138,15 +138,16 @@ class AdaptationView extends Component {
 	renderHeader(){
 		const { card, history  } = this.props;
 		const cdate = () => 'с ' + renderDate(card.start_date) + ' ' + (card.plan_readiness_date ? `по ${renderDate(card.plan_readiness_date)}` : '');
+		const rurl = createBaseUrl('Report', { cr_id: card.id });
 
 		return (	
 			<PageHeader
 				onBack={history.goBack}
 				title={<span>{card.person_fullname}</span>}
-				tags={<Tag color='green'>{cdate()}</Tag>}
 				extra={[
+					<Tag key='date' color='green'>{cdate()}</Tag>,
 					<div key='status' className='detail'>Статус: <span className='adaptation__status'>{card.status}</span></div>,
-					<a key='report' href={`${createBaseUrl('Report', { cr_id: card.id })}`} className='term'>Скачать отчет <Icon type='download' /></a>
+					<a key='report' href={rurl} className='term'>Скачать отчет <Icon type='download' /></a>
 				]}
 			>
 				<div className='wrap'>

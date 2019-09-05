@@ -1,8 +1,8 @@
 <%//Server.Execute(AppDirectoryPath() + '/wt/web/include/access_init.html');
-//curUserID = 6719948502038810952; // Volk
+curUserID = 6719948502038810952; // Volk
 //curUserID = 6719948317677868197 // Zayts
 //curUserID = 6719948498605842349; //Markin
-curUserID = 6711785032659205612; //Me
+//urUserID = 6711785032659205612; //Me
 var Adaptation = OpenCodeLib('x-local://wt/web/vsk/portal/adaptation/server/adapt.js');
 DropFormsCache('x-local://wt/web/vsk/portal/adaptation/server/adapt.js');
 
@@ -21,6 +21,15 @@ function get_Adaptations(queryObjects){
 		return (Int(curStep.object_id) == curUserID || userRole == 'admin');
 	}
 
+	function isUser(crdoc, userRole){
+		return ((crdoc.TopElem.person_id == curUserID) || (userRole == 'admin'));
+	}
+
+	function isManager(userRole){
+		var btypes = User.getManagerTypes();
+		return (userRole == btypes.manager || (userRole == 'admin'))
+	}
+
 	function toResponse(crdoc){
 		var currentStep = Adaptation.getCurrentStep(crdoc.DocID);
 		//Utils.setError('crdoc.DocID: ' + crdoc.DocID);
@@ -34,9 +43,9 @@ function get_Adaptations(queryObjects){
 		data.meta = {
 			actions: uactions,
 			assessments: ats,
-			allow_edit_tasks: (isEdit && currentStep.main_step == 'first'),
-			allow_edit_collaborator_assessment: (isEdit && currentStep.main_step == 'fourth'),
-			allow_edit_manager_assessment: (isEdit && currentStep.main_step == 'fourth')
+			allow_edit_tasks: isEdit,
+			allow_edit_collaborator_assessment: (isEdit && isUser(crdoc, urole) && currentStep.main_step == 'fourth'),
+			allow_edit_manager_assessment: (isEdit && isManager(urole) && currentStep.main_step == 'fourth')
 		}
 		return data;
 	}
@@ -226,6 +235,19 @@ function post_changeStep(queryObjects){
 	
 	var step = null;
 	var comment = data.HasProperty('comment') && data.GetOptProperty('comment') != 'undefined' ? data.comment : '';
+	Adaptation.createStep(
+		currentStep.id,
+		{
+			collaborator_id: currentUserId,
+			object_id: nextUserId,
+			data: comment,
+			step_id: processStep.next_step
+		}
+	);
+	/*alert('collaborator_id:' + currentUserId);
+	alert('object_id:' + nextUserId);
+	alert('data:' + comment);
+	alert('step_id:' + processStep.next_step);
 	if (action == 'transfer_for_approval' || action == 'return_for_revision') {
 		step = Adaptation.createStep(
 			currentStep.id,
@@ -238,7 +260,7 @@ function post_changeStep(queryObjects){
 		);
 	} else if (action == 'approve') {
 		step = Adaptation.createStep(currentStep.id, { collaborator_id: currentUserId, step_id: processStep.next_step });
-	}
+	}*/
 	
 	return Utils.toJSON(Utils.setSuccess());
 }
@@ -335,51 +357,44 @@ function get_Report(queryObjects){
 
 	oCell = oWorksheet.Cells.GetCell('A' + rindex);
 	oCell.Value = 'ФИО';
-	//oCell.Style.FontSize = 14;
-	oCell.Style.FontColor = '#444444';
+	oCell.Style.ForegroundColor = '#CCCCCC';
+	oCell.Style.VerticalAlignment = 'Center';
 	setMaxColWith(oCell.Value, 0);
 	//oCell.Style.IsBold = true;
 
 	oCell = oWorksheet.Cells.GetCell('B' + rindex);
 	oCell.Value = udoc.TopElem.fullname;
-	//oCell.Style.FontSize = 14;
-	oCell.Style.FontColor = '#444444'; 
 	setMaxColWith(oCell.Value, 1);
 	rindex = rindex + 1;
 
 	oCell = oWorksheet.Cells.GetCell('A' + rindex);
 	oCell.Value = 'Поразделение';
-	//oCell.Style.FontSize = 14;
-	oCell.Style.FontColor = '#444444'; 
+	oCell.Style.ForegroundColor = '#CCCCCC';
+	oCell.Style.VerticalAlignment = 'Center';
 	setMaxColWith(oCell.Value, 0);
-	//oCell.Style.IsBold = true;
 
 	oCell = oWorksheet.Cells.GetCell('B' + rindex);
 	oCell.Value = udoc.TopElem.position_parent_name;
-	//oCell.Style.FontSize = 14;
-	oCell.Style.FontColor = '#444444';
 	setMaxColWith(oCell.Value, 1);
 	rindex = rindex + 1;
 
 	oCell = oWorksheet.Cells.GetCell('A' + rindex);
 	oCell.Value = 'Должность';
-	//oCell.Style.FontSize = 14;
-	oCell.Style.FontColor = '#444444';
+	oCell.Style.ForegroundColor = '#CCCCCC';
+	oCell.Style.VerticalAlignment = 'Center';
 	setMaxColWith(oCell.Value, 0);
-	//oCell.Style.IsBold = true;
 
 	oCell = oWorksheet.Cells.GetCell('B' + rindex);
 	oCell.Value = udoc.TopElem.position_name;
-	//oCell.Style.FontSize = 14;
-	oCell.Style.FontColor = '#444444'; 
 	setMaxColWith(oCell.Value, 1);
+	rindex = rindex + 1;
 
 	var _tutors = getTutors(cdoc);
 	for(el in _tutors){
 		oCell = oWorksheet.Cells.GetCell('A' + rindex);
 		oCell.Value = String(el.boss_fullname);
-		//oCell.Style.FontSize = 14;
-		oCell.Style.FontColor = '#444444';
+		oCell.Style.ForegroundColor = '#CCCCCC';
+		oCell.Style.VerticalAlignment = 'Center';
 		setMaxColWith(oCell.Value, 0);
 
 		oCell = oWorksheet.Cells.GetCell('B' + rindex);
@@ -395,14 +410,16 @@ function get_Report(queryObjects){
 
 	oCell = oWorksheet.Cells.GetCell('A' + rindex);
 	oCell.Value = 'ОЦЕНКА';
-	//oCell.Style.FontSize = 14;
-	oCell.Style.FontColor = '#444444';
+	oCell.Style.ForegroundColor = '#CCCCCC';
+	oCell.Style.IsBold = true;
+	oCell.Style.VerticalAlignment = 'Center';
 	setMaxColWith(oCell.Value, 0);
 
 	oCell = oWorksheet.Cells.GetCell('B' + rindex);
 	oCell.Value = 'ОПИСАНИЕ УРОВНЯ ДОСТИЖЕНИЯ ЦЕЛИ';
-	//oCell.Style.FontSize = 14;
-	oCell.Style.FontColor = '#444444';
+	oCell.Style.ForegroundColor = '#CCCCCC';
+	oCell.Style.IsBold = true;
+	oCell.Style.VerticalAlignment = 'Center';
 	setMaxColWith(oCell.Value, 1);
 	rindex = rindex + 1;
 
@@ -427,36 +444,41 @@ function get_Report(queryObjects){
 	oCell = oWorksheet.Cells.GetCell('A' + rindex);
 	oCell.Value = 'ЦЕЛИ';
 	oCell.Style.FontSize = 10;
-	oCell.Style.FontColor = '#444444'; 
+	oCell.Style.ForegroundColor = '#CCCCCC';
 	oCell.Style.IsBold = true;
+	oCell.Style.VerticalAlignment = 'Center';
 	setMaxColWith(oCell.Value, 0);
 
 	oCell = oWorksheet.Cells.GetCell('B' + rindex);
 	oCell.Value = 'ОЖИДАЕМЫЙ РЕЗУЛЬТАТ';
 	oCell.Style.FontSize = 10;
-	oCell.Style.FontColor = '#444444'; 
+	oCell.Style.ForegroundColor = '#CCCCCC';
 	oCell.Style.IsBold = true;
+	oCell.Style.VerticalAlignment = 'Center';
 	setMaxColWith(oCell.Value, 1);
 
 	oCell = oWorksheet.Cells.GetCell('C' + rindex);
 	oCell.Value = 'ДОСТИГНУТЫЙ РЕЗУЛЬТАТ';
 	oCell.Style.FontSize = 10;
-	oCell.Style.FontColor = '#444444'; 
+	oCell.Style.ForegroundColor = '#CCCCCC';
 	oCell.Style.IsBold = true;
+	oCell.Style.VerticalAlignment = 'Center';
 	setMaxColWith(oCell.Value, 2);
 
 	oCell = oWorksheet.Cells.GetCell('D' + rindex);
 	oCell.Value = 'ОЦЕНКА СОТРУДНИКА';
 	oCell.Style.FontSize = 10;
-	oCell.Style.FontColor = '#444444'; 
+	oCell.Style.ForegroundColor = '#CCCCCC';
 	oCell.Style.IsBold = true;
+	oCell.Style.VerticalAlignment = 'Center';
 	setMaxColWith(oCell.Value, 3);
 
 	oCell = oWorksheet.Cells.GetCell('E' + rindex);
 	oCell.Value = 'ОЦЕНКА РУКОВОДИТЕЛЯ';
 	oCell.Style.FontSize = 10;
-	oCell.Style.FontColor = '#444444'; 
+	oCell.Style.ForegroundColor = '#CCCCCC';
 	oCell.Style.IsBold = true;
+	oCell.Style.VerticalAlignment = 'Center';
 	setMaxColWith(oCell.Value, 4);
 
 	rindex = rindex + 1;
