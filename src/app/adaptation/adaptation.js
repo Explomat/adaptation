@@ -147,23 +147,23 @@ class AdaptationView extends Component {
 				extra={[
 					<Tag key='date' color='green'>{cdate()}</Tag>,
 					<div key='status' className='detail'>Статус: <span className='adaptation__status'>{card.status}</span></div>,
-					<a key='report' href={rurl} className='term'>Скачать отчет <Icon type='download' /></a>
+					<a style={{ 'paddingTop': '12px', display: 'block' }} key='report' href={rurl} className='term'>Скачать отчет <Icon type='download' /></a>
 				]}
 			>
 				<div className='wrap'>
 					<div className='content padding'>
 						{card.tutors && card.tutors.map(t => {
 							return (
-								<Row key={t.person_id}>
+								<Row key={t.person_id} style={{ width: '70%' }}>
 									<UserDescription {...t}>{t.boss_type_name}</UserDescription>
 								</Row>
 							);
 						})}
-						<Row>
+						<Row style={{ width: '70%' }}>
 							<Col>
 								<div className='description'>
 									<div className='term'>Текущий этап</div>
-									<div className='detail'>{card.main_step} / {card.current_step}</div>
+									<div className='detail adaptation__current-step'>{card.main_step} / {card.current_step}</div>
 								</div>
 							</Col>
 						</Row>
@@ -184,7 +184,6 @@ class AdaptationView extends Component {
 					steps && steps.map(s => {
 						return (
 							<div key={s.id}>
-								<a href='#'>{s.name}</a>
 								<List>
 									{s.history && s.history.map(t => {
 										return (
@@ -192,11 +191,19 @@ class AdaptationView extends Component {
 												key={t.id}
 											>
 												 <List.Item.Meta
-												 	title={<span>{t.step} <span className='adaptation__date'>{renderDate(t.created_date)}</span></span>}
+												 	title={<span>
+												 		<span className='adaptation__date'>{renderDate(t.created_date)}</span>
+												 		<span className='adaptation__history-step'>{t.main_step} / {t.step}</span>
+												 	</span>}
 												 	description={t.type}
 												 />
 												 {t.collaborator} <Icon type='arrow-right' /> {t.object}
-												 {t.data && <div className='adaptation__history-data'>Комментарий: {t.data}</div>}
+												 {t.data && (
+												 	<div className='adaptation__history-data'>
+												 		Комментарий: 
+												 		<div className='adaptation__history-comment'>{t.data}</div>
+												 	</div>
+												 )}
 											</List.Item>
 										)
 									})}

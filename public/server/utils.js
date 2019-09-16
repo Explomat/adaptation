@@ -24,3 +24,7 @@ function setError(message){
 	log(message);
 	return setMessage('error', message);
 }
+
+function notificate(templateCode, primaryId, text, secondaryId){
+	tools.create_notification(templateCode, primaryId, text, secondaryId);
+}

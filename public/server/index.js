@@ -1,5 +1,5 @@
 <%//Server.Execute(AppDirectoryPath() + '/wt/web/include/access_init.html');
-curUserID = 6719948502038810952; // Volk
+//curUserID = 6719948502038810952; // Volk
 //curUserID = 6719948317677868197 // Zayts
 //curUserID = 6719948498605842349; //Markin
 //urUserID = 6711785032659205612; //Me
@@ -244,6 +244,8 @@ function post_changeStep(queryObjects){
 			step_id: processStep.next_step
 		}
 	);
+
+	Utils.notificate('adaptation', nextUserId, null, currentUserId);
 	/*alert('collaborator_id:' + currentUserId);
 	alert('object_id:' + nextUserId);
 	alert('data:' + comment);
