@@ -16,12 +16,12 @@ class Curator extends Component {
 
 	componentDidMount(){
 		const { match, currentTutorRole } = this.props;
-		this.props.getTutorAdaptations(match.params.id, currentTutorRole);
+		this.props.getTutorAdaptations(match.params, currentTutorRole);
 	}
 
 	handleChangeTutorRole(value){
 		const { match } = this.props;
-		this.props.getTutorAdaptations(match.params.id, value);
+		this.props.getTutorAdaptations(match.params, value);
 	}
 
 	renderTutorRoles(){

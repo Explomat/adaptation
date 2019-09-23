@@ -121,10 +121,11 @@ function getCurators(userId, userRole){
 
 	var bossTypes = User.getManagerTypes();
 	// если админ, то должен видеть всех кураторов
+
 	return XQuery("sql: \n\
 		select \n\
-			distinct(c.career_reserve_id), \n\
-			cs.id tutor_id, \n\
+			--distinct(c.career_reserve_id), \n\
+			distinct(cs.id) tutor_id, \n\
 			cs.fullname, \n\
 			cs.position_name, \n\
 			cs.position_parent_name \n\

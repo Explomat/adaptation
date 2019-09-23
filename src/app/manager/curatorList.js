@@ -11,7 +11,7 @@ class CuratorList extends Component {
 					{list.map(l => {
 						return (
 							<List.Item key={l.tutor_id}>
-								<Link to={`/curators/${l.tutor_id}`}>
+								<Link to={`/curators/${l.tutor_id}/true/false`}>
 									{l.fullname}: {l.position_name} <Icon type='arrow-right' /> {l.position_parent_name}
 								</Link>
 								

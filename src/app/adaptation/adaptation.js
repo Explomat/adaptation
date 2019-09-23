@@ -2,6 +2,7 @@ import React, { Component } from 'react';
 import { withRouter } from 'react-router';
 import { List, Icon, Button, Modal, Input, PageHeader, Row, Col, Steps, Card, Select, Tag } from 'antd';
 import Task from './task';
+import TaskForm from './taskForm';
 import { pureUrl } from '../../utils/request';
 import { renderDate } from '../../utils/date';
 import { connect } from 'react-redux';
@@ -28,20 +29,12 @@ class AdaptationView extends Component {
 		this.state = {
 			isShowModalTask: false,
 			isShowModalComment: false,
-			comment: '',
-			task: {
-				name: '',
-				expected_result: '',
-				achieved_result: '',
-				collaborator_assessment: '',
-				manager_assessment: ''
-			}
+			comment: ''
 		}
 
 		this.currentAction = null;
 		this.handleToggleTaskModal = this.handleToggleTaskModal.bind(this);
 		this.handleAddTask = this.handleAddTask.bind(this);
-		this.handleChangeTaskProp = this.handleChangeTaskProp.bind(this);
 		this.handleChangeStep = this.handleChangeStep.bind(this);
 		this.handeAction = this.handeAction.bind(this);
 		this.handleToggleCommentModal = this.handleToggleCommentModal.bind(this);
@@ -50,14 +43,7 @@ class AdaptationView extends Component {
 
 	handleToggleTaskModal(){
 		this.setState({
-			isShowModalTask: !this.state.isShowModalTask,
-			task: {
-				name: '',
-				expected_result: '',
-				achieved_result: '',
-				collaborator_assessment: '',
-				manager_assessment: ''
-			}
+			isShowModalTask: !this.state.isShowModalTask
 		});
 	}
 
@@ -65,15 +51,6 @@ class AdaptationView extends Component {
 		this.setState({
 			isShowModalComment: !this.state.isShowModalComment,
 			comment: ''
-		});
-	}
-
-	handleChangeTaskProp(propName, value) {
-		this.setState({
-			task: {
-				...this.state.task,
-				[propName]: value
-			}
 		});
 	}
 
@@ -98,9 +75,8 @@ class AdaptationView extends Component {
 		this.handleToggleCommentModal();
 	}
 
-	handleAddTask(){
+	handleAddTask(task){
 		const { addTask } = this.props;
-		const { task } = this.state;
 		addTask(task);
 		this.handleToggleTaskModal();
 	}
@@ -124,7 +100,7 @@ class AdaptationView extends Component {
 								title={
 									<span>
 										<span className='adaptation__date'>{renderDate(s.date)}</span>
-										{index < curStepIndex ? <Icon className='adaptation__date-check' type='check'/> : null}
+										{index <= curStepIndex ? <Icon className='adaptation__date-check' type='check'/> : null}
 									</span>
 								}
 								description={s.description}
@@ -315,7 +291,9 @@ class AdaptationView extends Component {
 						title='Мои задачи'
 						extra={
 							meta.allow_edit_tasks ? (
-								<Icon className='adaptation__tasks-add' type='plus-circle' theme='filled' onClick={this.handleToggleTaskModal}/>
+								<Button className='adaptation__tasks-add' type='primary' ghost onClick={this.handleToggleTaskModal}>
+									Добавить задачу
+								</Button>
 							) : null
 						}
 						actions={
@@ -335,46 +313,13 @@ class AdaptationView extends Component {
 					>
 						{this.renderTasks()}
 					</Card>
-					<Modal
-						title='Создать'
+					<TaskForm
+						title='Новая задача'
 						visible={isShowModalTask}
-						onOk={this.handleAddTask}
+						onCommit={this.handleAddTask}
 						onCancel={this.handleToggleTaskModal}
-					>
-						<Input placeholder='Цель' value={task.name} onChange={e => this.handleChangeTaskProp('name', e.target.value)}/>
-						<div style={{ margin: '24px 0' }} />
-						<Input.TextArea
-							placeholder='Ожидаемый результат'
-							value={task.expected_result}
-							autosize={{ minRows: 3}}
-							onChange={e => this.handleChangeTaskProp('expected_result', e.target.value)}
-						/>
-						<div style={{ margin: '24px 0' }} />
-						<Input.TextArea
-							placeholder='Достигнутый результат'
-							value={task.achieved_result}
-							autosize={{ minRows: 3}}
-							onChange={e => this.handleChangeTaskProp('achieved_result', e.target.value)}
-						/>
-						<div style={{ margin: '24px 0' }} />
-						<label>Оценка сотрудника</label>
-						<Select disabled={!meta.allow_edit_collaborator_assessment} defaultValue={defaultCollaboratorAssessment.name} onChange={value => this.handleChangeTaskProp('collaborator_assessment', value)}>
-							{meta.assessments && meta.assessments.map(a => {
-								return (
-									<Select.Option key={a.id} value={a.name}>{a.name}</Select.Option>
-								);
-							})}
-						</Select>
-						<div style={{ margin: '24px 0' }} />
-						<label>Оценка руководителя</label>
-						<Select disabled={!meta.allow_edit_manager_assessment} defaultValue={defaultManagerAssessment.name} onChange={value => this.handleChangeTaskProp('manager_assessment', value)}>
-							{meta.assessments && meta.assessments.map(a => {
-								return (
-									<Select.Option key={a.id} value={a.name}>{a.name}</Select.Option>
-								);
-							})}
-						</Select>
-					</Modal>
+						meta={meta}
+					/>
 					<Modal
 						title='Сообщение'
 						visible={isShowModalComment}

@@ -13,10 +13,16 @@ function create(crId, data){
 
 	var crDoc = OpenDoc(UrlFromDocID(Int(q.id)));
 	var task = crDoc.TopElem.tasks.AddChild();
-	task.name = data.name;
+
+	for (el in data){
+		try {
+			ch = task.OptChild(el);
+			ch.Value = data[el];
+		} catch(e) {}
+	}
+	//task.name = data.name;
 	task.type = 'task';
 	task.status = 'plan';
-	task.desc = data.desc;
 	crDoc.Save();
 
 	var customDoc = tools.new_doc_by_name('cc_adaptation_task');
@@ -24,10 +30,31 @@ function create(crId, data){
 	customDoc.TopElem.object_id = task.id;
 	customDoc.TopElem.object_type = 'task';
 	customDoc.TopElem.created_date = new Date();
+
+	for (el in data){
+		try {
+			ch = customDoc.TopElem.OptChild(el);
+			ch.Value = data[el];
+		} catch(e) {}
+	}
+
 	customDoc.BindToDb(DefaultDb);
 	customDoc.Save();
 
-	return task;
+	var obj = {};
+	for (el in task){
+		try {
+			obj.SetProperty(el.Name, String(el.Value));
+		} catch(e) {}
+	}
+	for (el in customDoc.TopElem){
+		try {
+			obj.SetProperty(el.Name, String(el.Value));
+		} catch(e) {}
+	}
+
+	obj.created_date = StrXmlDate(Date(obj.created_date));
+	return obj;
 }
 
 function update(crId, taskId, data){
@@ -48,7 +75,7 @@ function update(crId, taskId, data){
 	for (el in data){
 		try {
 			ch = task.OptChild(el);
-			ch.Value = data[el]
+			ch.Value = data[el];
 		} catch(e) {}
 	}
 	crDoc.Save();
@@ -77,6 +104,7 @@ function update(crId, taskId, data){
 			obj.SetProperty(el.Name, String(el.Value));
 		} catch(e) {}
 	}
+	obj.created_date = StrXmlDate(Date(obj.created_date));
 	return obj;
 }
 

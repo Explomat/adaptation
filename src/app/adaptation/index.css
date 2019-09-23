@@ -1,59 +1,62 @@
 .adaptations{
-    margin-bottom: 30px;
+	margin-bottom: 30px;
+}
+
+.adaptation__form-label{
+	color: rgba(0, 0, 0, 0.36);
+    font-size: 12px;
 }
 
 .adaptation__date-check{
-    color: #52c41a;
-    font-size: 18px;
+	color: #52c41a;
+	font-size: 18px;
+	position: absolute;
 }
 
 .adaptation__history-step{
-    font-weight: bold;
-    text-decoration: underline;
+	font-weight: bold;
 }
 
 .adaptation__status{
-    font-weight: bold;
+	font-weight: bold;
 }
 
 .adaptation__task-date{
-    margin-right: 8px;
-    font-size: 11px !important;
-    line-height: initial !important;
+	margin-right: 8px;
+	font-size: 11px !important;
+	line-height: initial !important;
 }
 
 .adaptation__history-data{
-    /*font-weight: bold;*/
-    margin-top: 8px;
-    font-size: 12px;
-    color: rgba(0,0,0,.45);
+	margin-top: 8px;
+	font-size: 12px;
+	color: rgba(0,0,0,.45);
 }
 
 .adaptation__history-comment{
-    padding: 6px;
-    border: 2px solid #aac7d6;
-    border-radius: 4px;
-    font-size: 13px;
-    background-color: aliceblue;
-    color: rgba(0,0,0,.65);
+	padding: 6px;
+	border: 2px solid #aac7d6;
+	border-radius: 4px;
+	font-size: 13px;
+	background-color: aliceblue;
+	color: rgba(0,0,0,.65);
 }
 
 .adaptation__tasks-actions{
-    margin-right: 16px;
+	margin-right: 16px;
 }
 
 .adaptation__steps{
-    margin-top: 20px;
-    margin-bottom: 50px;
+	margin-top: 20px;
+	margin-bottom: 50px;
 }
 
 .adaptation__tasks-add{
-    font-size: 30px;
-    color: rgb(245, 123, 123);
+	
 }
 
 .task__icon{
-    font-size: 18px;
+	font-size: 18px;
 }
 
 .adaptation__header {
@@ -69,47 +72,47 @@
 }
 
 .content .description {
-    display: table;
+	display: table;
 }
 
 .description .term {
-    display: table-cell;
-    margin-right: 8px;
-    padding-bottom: 8px;
-    white-space: nowrap;
-    line-height: 20px;
+	display: table-cell;
+	margin-right: 8px;
+	padding-bottom: 8px;
+	white-space: nowrap;
+	line-height: 20px;
 }
 
 .ant-page-header-heading-extra .detail {
-    padding-top: 12px;
+	padding-top: 12px;
 }
 
 .description .detail {
-    display: table-cell;
-    padding-bottom: 8px;
-    width: 100%;
-    line-height: 20px;
+	display: table-cell;
+	padding-bottom: 8px;
+	width: 100%;
+	line-height: 20px;
 }
 
 .description .term:after {
-    position: relative;
-    top: -0.5px;
-    margin: 0 8px 0 2px;
-    content: ":";
+	position: relative;
+	top: -0.5px;
+	margin: 0 8px 0 2px;
+	content: ":";
 }
 
 .ant-steps-item-title {
-    font-size: 14px;   
+	font-size: 14px;   
 }
 
 .ant-tag{
-    margin-right: 0px;
+	margin-right: 0px;
 }
 
 .adaptation__current-step{
-    font-weight: bold;
+	font-weight: bold;
 }
 
 .ant-page-header-heading-extra{
-    text-align: right;
+	text-align: right;
 }

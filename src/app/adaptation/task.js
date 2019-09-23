@@ -1,5 +1,8 @@
 import React, { Component } from 'react';
-import { Icon, Modal, Input, Divider, Select, Tag } from 'antd';
+import {
+	Icon, Modal, Input, Divider, Select, Tag, Button
+} from 'antd';
+import TaskForm from './taskForm';
 import { renderDate } from '../../utils/date';
 
 class Task extends Component {
@@ -8,24 +11,18 @@ class Task extends Component {
 		super(props);
 
 		this.state = {
-			isShowModal: false,
-			name: props.name,
-			expected_result: props.expected_result,
-			achieved_result: props.achieved_result,
-			collaborator_assessment: props.collaborator_assessment,
-			manager_assessment: props.manager_assessment
+			isShowModal: false
 		}
 
 		this.handleToggleModal = this.handleToggleModal.bind(this);
-		this.handleChangeProp = this.handleChangeProp.bind(this);
 		this.handleUpdate = this.handleUpdate.bind(this);
 	}
 
-	handleUpdate(){
+	handleUpdate(state){
 		const { id, updateTask } = this.props;
 		updateTask(id, {
 			id,
-			...this.state
+			...state
 		});
 		this.handleToggleModal();
 	}
@@ -36,23 +33,17 @@ class Task extends Component {
 		});
 	}
 
-	handleChangeProp(propName, value) {
-		this.setState({
-			[propName]: value
-		});
-	}
 
 	render() {
-		const { meta, id, created_date } = this.props;
-		const { removeTask } = this.props;
+		const { meta, id, created_date, removeTask } = this.props;
 		const {
-			isShowModal,
 			name,
 			expected_result,
 			achieved_result,
 			collaborator_assessment,
 			manager_assessment
-		} = this.state;
+		} = this.props;
+		const { isShowModal } = this.state;
 
 		let defaultCollaboratorAssessment = meta.assessments.find(a => a.name === collaborator_assessment);
 		if (!defaultCollaboratorAssessment){
@@ -87,29 +78,47 @@ class Task extends Component {
 						<Icon className='task__icon' type='delete' onClick={() => removeTask(id)}/>
 					</span>
 				</td>)}
-				<Modal
+				<TaskForm
+					title='Редактирование'
+					visible={isShowModal}
+					onCommit={this.handleUpdate}
+					onCancel={this.handleToggleModal}
+					{...this.props}
+				/>
+				{/*<Modal
 					title='Редактирование'
 					visible={isShowModal}
 					onOk={this.handleUpdate}
 					onCancel={this.handleToggleModal}
+					footer={[
+						<Button type='primary' key='submit' onClick={this.handleUpdate}>
+							Ok
+						</Button>,
+						<Button key='cancel' onClick={this.handleToggleModal}>
+							Отмена
+						</Button>
+					]}
 				>
-					<Input placeholder='Цель' value={name} onChange={e => this.handleChangeProp('name', e.target.value)}/>
+					<label className='adaptation__form-label'>Цель</label>
+					<Input placeholder='Укажите вашу цель' value={name} onChange={e => this.handleChangeProp('name', e.target.value)}/>
 					<div style={{ margin: '24px 0' }} />
+					<label className='adaptation__form-label'>Ожидаемый результат</label>
 					<Input.TextArea
-						placeholder='Ожидаемый результат'
+						placeholder='Опишите ожидаемый результат'
 						value={expected_result}
 						autosize={{ minRows: 3}}
 						onChange={e => this.handleChangeProp('expected_result', e.target.value)}
 					/>
 					<div style={{ margin: '24px 0' }} />
+					<label className='adaptation__form-label'>Достигнутый результат</label>
 					<Input.TextArea
-						placeholder='Достигнутый результат'
+						placeholder='Опишите достигнутый результат'
 						value={achieved_result}
 						autosize={{ minRows: 3}}
 						onChange={e => this.handleChangeProp('achieved_result', e.target.value)}
 					/>
 					<div style={{ margin: '24px 0' }} />
-					<label>Оценка сотрудника</label>
+					<label className='adaptation__form-label'>Оценка сотрудника</label>
 					<Select disabled={!meta.allow_edit_collaborator_assessment} defaultValue={defaultCollaboratorAssessment.name} onChange={value => this.handleChangeProp('collaborator_assessment', value)}>
 						{meta.assessments && meta.assessments.map(a => {
 							return (
@@ -118,7 +127,7 @@ class Task extends Component {
 						})}
 					</Select>
 					<div style={{ margin: '24px 0' }} />
-					<label>Оценка руководителя</label>
+					<label className='adaptation__form-label'>Оценка руководителя</label>
 					<Select disabled={!meta.allow_edit_manager_assessment} defaultValue={defaultManagerAssessment.name} onChange={value => this.handleChangeProp('manager_assessment', value)}>
 						{meta.assessments && meta.assessments.map(a => {
 							return (
@@ -126,7 +135,7 @@ class Task extends Component {
 							);
 						})}
 					</Select>
-				</Modal>
+				</Modal>*/}
 			</tr>
 		);
 	}

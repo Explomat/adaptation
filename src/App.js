@@ -29,7 +29,7 @@ class App extends Component {
 					)
 				}} />
 				<Route exact path='/adaptation/:id' component={AdaptationView}/>
-				<Route exact path='/curators/:id' component={Curator}/>
+				<Route exact path='/curators/:id/:is_curator?/:all?' component={Curator}/>
 			</div>
 		);
 	}

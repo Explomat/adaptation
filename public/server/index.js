@@ -17,6 +17,33 @@ DropFormsCache('x-local://wt/web/vsk/portal/adaptation/server/user.js');
 
 function get_Adaptations(queryObjects){
 
+	function getTutorsCards(tId, tRole){
+		return XQuery("sql: \n\
+			select \n\
+				c.id, \n\
+				c.name, \n\
+				c.status \n\
+			from ( \n\
+				select \n\ 
+					distinct(crs.id), \n\ 
+					crs.name, \n\
+					crst.name status, \n\
+					t.p.query('boss_type_id').value('.','varchar(50)') boss_type_id, \n\
+					t.p.query('person_id').value('.','varchar(50)') tutor_id \n\
+				from  \n\
+					career_reserves crs \n\
+				inner join career_reserve cr on cr.id = crs.id \n\
+				inner join cc_custom_adaptations cas on cas.career_reserve_id = crs.id \n\
+				inner join [common.career_reserve_status_types] crst on crst.id = crs.status \n\
+				cross apply cr.data.nodes('/career_reserve/tutors/tutor') as t(p) \n\
+			) c \n\
+			inner join boss_types bt on bt.id = c.boss_type_id \n\
+			where \n\
+				c.tutor_id = " + Int(tId) + " \n\
+				and bt.code = '" + tRole + "' \n\
+		");
+	}
+
 	function isAlowEditTasks(curStep, userRole){
 		return (Int(curStep.object_id) == curUserID || userRole == 'admin');
 	}
@@ -69,48 +96,35 @@ function get_Adaptations(queryObjects){
 	var isTutor = queryObjects.HasProperty('is_tutor') ? Trim(queryObjects.is_tutor) : undefined;
 	if (isTutor == 'true'){
 		var tutorId = queryObjects.HasProperty('tutor_id') ? Trim(queryObjects.tutor_id) : curUserID;
-		if (tutorId == 'undefined') {
+		if (tutorId == 'undefined' || tutorId == '') {
 			tutorId = curUserID;
 		}
 
 		var bossTypes = User.getManagerTypes();
-		var tutorRoles = User.getTutorRoles(tutorId);
 		var tutorRole = queryObjects.HasProperty('tutor_role') ? Trim(queryObjects.tutor_role) : bossTypes.curator;
-		if (tutorRole == 'undefined' || tutorRole == '') {
+		var isCurator =  queryObjects.HasProperty('is_curator') ? Trim(queryObjects.is_curator) : undefined;
+		if (tutorRole == 'undefined' || tutorRole == '' || isCurator == 'true') {
 			tutorRole = bossTypes.curator;
 		}
-		var q = XQuery("sql: \n\
-			select \n\
-				c.id, \n\
-				c.name, \n\
-				c.status \n\
-			from ( \n\
-				select \n\ 
-					crs.id, \n\ 
-					crs.name, \n\
-					crst.name status, \n\
-					t.p.query('boss_type_id').value('.','varchar(50)') boss_type_id, \n\
-					t.p.query('person_id').value('.','varchar(50)') tutor_id \n\
-				from  \n\
-					career_reserves crs \n\
-				inner join career_reserve cr on cr.id = crs.id \n\
-				inner join [common.career_reserve_status_types] crst on crst.id = crs.status \n\
-				cross apply cr.data.nodes('/career_reserve/tutors/tutor') as t(p) \n\
-			) c \n\
-			inner join boss_types bt on bt.id = c.boss_type_id \n\
-			where \n\
-				c.tutor_id = " + Int(tutorId) + " \n\
-				and bt.code = '" + tutorRole + "' \n\
-		");
+
+		var curatorCards = getTutorsCards(Int(tutorId), tutorRole);
+
+		var isAll =  queryObjects.HasProperty('all') ? Trim(queryObjects.all) : undefined;
+		if (ArrayCount(curatorCards) == 0 && isAll == 'true' && isCurator == 'false') {
+			tutorRole = bossTypes.manager;
+			curatorCards = getTutorsCards(Int(tutorId), tutorRole);
+		}
 
 		var ucurator = User.getById(Int(tutorId));
+		var tutorRoles = User.getTutorRoles(tutorId);
 		return Utils.toJSON(Utils.setSuccess({
-			cards: q,
+			cards: curatorCards,
 			curator_fullname: String(ucurator.fullname),
 			tutorRoles: tutorRoles,
 			currentTutorRole: tutorRole
 		}));
 	}
+
 	var q = XQuery("sql: \n\
 		select \n\
 			crs.id, \n\
@@ -126,7 +140,10 @@ function get_Adaptations(queryObjects){
 
 function get_Curators(queryObjects){
 	var urole = User.getRole(curUserID);
+	alert('urole: ' + urole);
+	alert('curUserID: ' + curUserID);
 	var curators = Adaptation.getCurators(curUserID, urole);
+	alert('curators: ' + tools.object_to_text(curators, 'json'));
 	return Utils.toJSON(Utils.setSuccess(curators));
 }
 
@@ -206,7 +223,7 @@ function post_changeStep(queryObjects){
 	//Получаем этапы, ранжируем по номеру
 	var processSteps = Adaptation.getProcessSteps(personFromRole, currentStep.step_id, action);
 	//alert('processSteps: ' + tools.object_to_text(processSteps, 'json'))
-	//alert(tools.object_to_text(processStep, 'json'));
+	
 	if (ArrayCount(processSteps) == 0){
 		return Utils.toJSON(Utils.setError('Next step not found'));
 	}

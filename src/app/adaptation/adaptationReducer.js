@@ -11,7 +11,7 @@ const tasksReducer = (state = [], action) => {
 			return state.filter(t => t.id !== id);
 		}
 
-		case constants.UPDATE_TASK_SUCCESS: {
+		case constants.EDIT_TASK_SUCCESS: {
 			const id = action.id;
 			return state.map(t => {
 				if (t.id === id){
@@ -51,7 +51,7 @@ const adaptationReducer = (state = {
 
 		case constants.ADD_TASK_SUCCESS:
 		case constants.REMOVE_TASK_SUCCESS:
-		case constants.UPDATE_TASK_SUCCESS: {
+		case constants.EDIT_TASK_SUCCESS: {
 			return {
 				...state,
 				card: {

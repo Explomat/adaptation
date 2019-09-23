@@ -1,7 +1,7 @@
 export function pureUrl(){
-	/*return process.env.NODE_ENV === 'production' ?
-			window.location.protocol + '//e-learning.vsk.ru' : window.location.protocol + '//192.168.73.37';*/
-	return `${window.location.protocol}//e-learning.vsk.ru`;
+	return process.env.NODE_ENV === 'production' ?
+			window.location.protocol + '//e-learning.vsk.ru' : window.location.protocol + '//192.168.73.37';
+	//return `${window.location.protocol}//e-learning.vsk.ru`;
 }
 
 export function createBaseUrl(action_name, params = {}){
