@@ -7,9 +7,9 @@ class Task extends Component {
 		super(props);
 
 		this.state = {
-			name: props.name,
-			expected_result: props.expected_result,
-			achieved_result: props.achieved_result,
+			name: props.name || '',
+			expected_result: props.expected_result || '',
+			achieved_result: props.achieved_result || '',
 			collaborator_assessment: props.collaborator_assessment,
 			manager_assessment: props.manager_assessment
 		}
@@ -21,12 +21,6 @@ class Task extends Component {
 	handleCommit(){
 		const { onCommit, onCancel } = this.props;
 		onCommit(this.state);
-		/*const { id, updateTask } = this.props;
-		updateTask(id, {
-			id,
-			...this.state
-		});
-		this.handleToggleModal();*/
 	}
 
 
@@ -61,8 +55,8 @@ class Task extends Component {
 				onOk={this.handleCommit}
 				onCancel={onCancel}
 				footer={[
-					<Button type='primary' key='submit' onClick={this.handleCommit}>
-						Ok
+					<Button disabled={name.trim() === '' || expected_result.trim() === ''} type='primary' key='submit' onClick={this.handleCommit}>
+						Сохранить
 					</Button>,
 					<Button key='cancel' onClick={onCancel}>
 						Отмена

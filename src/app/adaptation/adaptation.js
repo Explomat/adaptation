@@ -3,12 +3,14 @@ import { withRouter } from 'react-router';
 import { List, Icon, Button, Modal, Input, PageHeader, Row, Col, Steps, Card, Select, Tag } from 'antd';
 import Task from './task';
 import TaskForm from './taskForm';
+import AssessmentsLegend from './AssessmentsLegend';
 import { pureUrl } from '../../utils/request';
 import { renderDate } from '../../utils/date';
 import { connect } from 'react-redux';
 import { getAdaptation, changeStep, addTask, updateTask, removeTask } from './adaptationActions';
 import { loading } from '../../appActions';
 import { createBaseUrl } from '../../utils/request';
+import { calculatePercent } from './utils/calculate';
 import './index.css';
 import 'antd/es/table/style/index.css';
 
@@ -59,7 +61,8 @@ class AdaptationView extends Component {
 	}
 
 	handeAction(action){
-		const { changeStep } = this.props;
+		const { changeStep, card } = this.props;
+
 		if (action.allow_additional_data === 'true'){
 			this.currentAction = action;
 			this.handleToggleCommentModal();
@@ -195,6 +198,8 @@ class AdaptationView extends Component {
 
 	renderTasks(){
 		const { card, meta, updateTask, removeTask } = this.props;
+		const collaboratorAssessement = calculatePercent(card.tasks.map(t => t.collaborator_assessment), meta.assessments);
+		const managerAssessement = calculatePercent(card.tasks.map(t => t.manager_assessment), meta.assessments);
 		if (card.tasks){
 			const columns = [
 				{
@@ -261,6 +266,18 @@ class AdaptationView extends Component {
 													);
 												})}
 											</tbody>
+											<tfoot>
+												{card.tasks.length > 0 && <tr>
+													<td></td>
+													<td></td>
+													<td style={{ fontWeight: 'bold', padding: '16px' }}>
+														Итоговая оценка:
+													</td>
+													<td style={{ padding: '16px' }}>{collaboratorAssessement && <Tag color={collaboratorAssessement.color}>{collaboratorAssessement.name}</Tag>}</td>
+													<td style={{ padding: '16px' }}>{managerAssessement && <Tag color={managerAssessement.color}>{managerAssessement.name}</Tag>}</td>
+													<td></td>
+												</tr>}
+											</tfoot>
 										</table>
 									</div>
 								</div>
@@ -286,6 +303,7 @@ class AdaptationView extends Component {
 				{ this.renderHeader() }
 				<div className='adaptation__body'>
 					{ this.renderMainSteps() }
+					{meta.is_show_assessments && <AssessmentsLegend assessments={meta.assessments}/>}
 					<Card
 						className='adaptation__tasks'
 						title='Мои задачи'
@@ -301,6 +319,7 @@ class AdaptationView extends Component {
 								return (
 									<Button
 											key={a.name}
+											disabled={card.tasks.length === 0}
 											className='adaptation__tasks-actions'
 											type='primary'
 											onClick={() => this.handeAction(a)}

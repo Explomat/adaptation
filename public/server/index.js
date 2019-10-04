@@ -1,5 +1,5 @@
 <%//Server.Execute(AppDirectoryPath() + '/wt/web/include/access_init.html');
-//curUserID = 6719948502038810952; // Volk
+curUserID = 6719948502038810952; // Volk
 //curUserID = 6719948317677868197 // Zayts
 //curUserID = 6719948498605842349; //Markin
 //urUserID = 6711785032659205612; //Me
@@ -70,6 +70,7 @@ function get_Adaptations(queryObjects){
 		data.meta = {
 			actions: uactions,
 			assessments: ats,
+			is_show_assessments: currentStep.main_step == 'fourth',
 			allow_edit_tasks: isEdit,
 			allow_edit_collaborator_assessment: (isEdit && isUser(crdoc, urole) && currentStep.main_step == 'fourth'),
 			allow_edit_manager_assessment: (isEdit && isManager(urole) && currentStep.main_step == 'fourth')

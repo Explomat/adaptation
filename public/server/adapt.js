@@ -8,7 +8,8 @@ function getAssessments(){
 			convert(varchar(max), aas.id) id, \n\
 			aas.name, \n\
 			aas.description, \n\
-			aas.color \n\
+			aas.color, \n\
+			aas.[percent] \n\
 		from cc_adaptation_assessments aas \n\
 	");
 }
