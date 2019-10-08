@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { Card } from 'antd';
+import { Card, Alert } from 'antd';
 import AdaptationList from './adaptationList';
 import { connect } from 'react-redux';
 import { getUserAdaptations } from './adaptationActions';
@@ -14,12 +14,12 @@ class Adaptation extends Component {
 	render() {
 		const { adaptationList } = this.props;
 		if (adaptationList.length === 0) {
-			return null;
+			return <Alert message='Нет данных' type='info' />
 		}
 
 		return (
 			<div className='adaptations'>
-				<Card title='Моя адаптация'>
+				<Card>
 					<AdaptationList list={adaptationList}/>
 				</Card>
 			</div>

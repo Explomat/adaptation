@@ -3,7 +3,7 @@ import { withRouter } from 'react-router';
 import { List, Icon, Button, Modal, Input, PageHeader, Row, Col, Steps, Card, Select, Tag } from 'antd';
 import Task from './task';
 import TaskForm from './taskForm';
-import AssessmentsLegend from './AssessmentsLegend';
+import AssessmentsLegend from './assessmentsLegend';
 import { pureUrl } from '../../utils/request';
 import { renderDate } from '../../utils/date';
 import { connect } from 'react-redux';
@@ -236,6 +236,7 @@ class AdaptationView extends Component {
 								<div className='ant-table-content'>
 									<div className='ant-table-body'>
 										<table>
+											<colgroup><col/><col/><col/></colgroup>
 											<thead className='ant-table-thead'>
 												<tr>
 												{columns.map(c => {

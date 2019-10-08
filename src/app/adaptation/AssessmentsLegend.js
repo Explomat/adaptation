@@ -11,7 +11,7 @@ class AssessmentsLegend extends Component {
 		});
 		return (
 			<div className='adaptation__legend'>
-				<span className='ant-page-header-heading-title'>Внимательно прочитайте инструкцию перед заполнением!</span>
+				<span className='adaptation__legend-title ant-page-header-heading-title'>Внимательно прочитайте инструкцию перед заполнением!</span>
 				<Table className='adaptation__legend_table' pagination={false} dataSource={source} columns={[
 					{
 						title: 'Оценка',

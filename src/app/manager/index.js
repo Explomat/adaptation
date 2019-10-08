@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { Card } from 'antd';
+import { Card, Alert } from 'antd';
 import CuratorList from './curatorList';
 import { connect } from 'react-redux';
 import { getCurators } from './managerActions';
@@ -14,11 +14,11 @@ class ManagerList extends Component {
 	render() {
 		const curatorList = this.props.curatorList;
 		if (curatorList.length === 0) {
-			return null;
+			return <Alert message='Нет данных' type='info' />
 		}
 		return (
 			<div className='curators'>
-				<Card title='Мои кураторы'>
+				<Card>
 					<CuratorList list={curatorList}/>
 				</Card>
 			</div>

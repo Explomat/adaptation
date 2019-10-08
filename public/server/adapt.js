@@ -125,11 +125,8 @@ function getCurators(userId, userRole){
 
 	return XQuery("sql: \n\
 		select \n\
-			--distinct(c.career_reserve_id), \n\
 			distinct(cs.id) tutor_id, \n\
-			cs.fullname, \n\
-			cs.position_name, \n\
-			cs.position_parent_name \n\
+			cs.fullname + ' (' + cs.position_name + ')' [name] \n\
 		from ( \n\
 			select \n\
 				c.career_reserve_id, \n\

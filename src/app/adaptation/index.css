@@ -2,6 +2,10 @@
 	margin-bottom: 30px;
 }
 
+.adaptation__legend-title{
+	margin-bottom: 8px;
+}
+
 .adaptation__legend{
 	background-color: #e6f7ff;
     color: black;
@@ -67,6 +71,7 @@
 	font-size: 13px;
 	background-color: aliceblue;
 	color: rgba(0,0,0,.65);
+	word-break: break-word;
 }
 
 .adaptation__tasks-actions{

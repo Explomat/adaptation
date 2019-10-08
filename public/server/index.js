@@ -1,5 +1,5 @@
 <%//Server.Execute(AppDirectoryPath() + '/wt/web/include/access_init.html');
-curUserID = 6719948502038810952; // Volk
+//curUserID = 6719948502038810952; // Volk
 //curUserID = 6719948317677868197 // Zayts
 //curUserID = 6719948498605842349; //Markin
 //urUserID = 6711785032659205612; //Me
@@ -26,13 +26,14 @@ function get_Adaptations(queryObjects){
 			from ( \n\
 				select \n\ 
 					distinct(crs.id), \n\ 
-					crs.name, \n\
+					cs.fullname + ' (' + cs.position_name + ')' [name], \n\
 					crst.name status, \n\
 					t.p.query('boss_type_id').value('.','varchar(50)') boss_type_id, \n\
 					t.p.query('person_id').value('.','varchar(50)') tutor_id \n\
 				from  \n\
 					career_reserves crs \n\
 				inner join career_reserve cr on cr.id = crs.id \n\
+				inner join collaborators cs on cs.id = crs.person_id \n\
 				inner join cc_custom_adaptations cas on cas.career_reserve_id = crs.id \n\
 				inner join [common.career_reserve_status_types] crst on crst.id = crs.status \n\
 				cross apply cr.data.nodes('/career_reserve/tutors/tutor') as t(p) \n\
@@ -126,13 +127,16 @@ function get_Adaptations(queryObjects){
 		}));
 	}
 
+	alert('TTTT: ')
+	alert('curUserID: ' + curUserID);
 	var q = XQuery("sql: \n\
 		select \n\
 			crs.id, \n\
-			crs.name, \n\
+			cs.fullname + ' (' + cs.position_name + ')' [name], \n\
 			crst.name [status] \n\
 		from career_reserves crs \n\
 		inner join [common.career_reserve_status_types] crst on crst.id = crs.status \n\
+		inner join collaborators cs on cs.id = crs.person_id \n\
 		where \n\
 			crs.person_id = " + curUserID + " \n\
 	");
@@ -141,10 +145,7 @@ function get_Adaptations(queryObjects){
 
 function get_Curators(queryObjects){
 	var urole = User.getRole(curUserID);
-	alert('urole: ' + urole);
-	alert('curUserID: ' + curUserID);
 	var curators = Adaptation.getCurators(curUserID, urole);
-	alert('curators: ' + tools.object_to_text(curators, 'json'));
 	return Utils.toJSON(Utils.setSuccess(curators));
 }
 

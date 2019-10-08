@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
 import { withRouter } from 'react-router';
-import { Card, PageHeader, Select } from 'antd';
+import { Card, PageHeader, Select, Alert } from 'antd';
 import AdaptationList from '../adaptation/adaptationList';
 import { connect } from 'react-redux';
 import { getTutorAdaptations } from './curatorActions';
@@ -41,15 +41,15 @@ class Curator extends Component {
 	render() {
 		const { adaptationList, curator_fullname, history } = this.props;
 		if (adaptationList.length === 0) {
-			return null;
+			return <Alert message='Нет данных' type='info' />
 		}
 		return (
 			<div className='curators'>
-				{history.location.pathname === '/' ? (
+				{history.location.pathname === '/curators' ? (
 					<Card
-						title='Адаптация сотрудников'
-						extra={this.renderTutorRoles()}
+						/*extra={this.renderTutorRoles()}*/
 					>
+						{this.renderTutorRoles()}
 						<AdaptationList list={adaptationList}/>
 					</Card>
 				):(

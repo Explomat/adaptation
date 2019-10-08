@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { List } from 'antd';
+import { List, Icon } from 'antd';
 import { Link } from 'react-router-dom';
 import unescapeSymbols from '../../utils/unescape';
 
@@ -16,7 +16,8 @@ class AdaptationList extends Component {
 								key={l.id}
 							>
 								 <List.Item.Meta
-								 	title={ <Link style={{color: '#1890ff'}} to={`/adaptation/${l.id}`} key={l.id}>{unescapeSymbols(l.name)}</Link>}
+								 	avatar={<Icon type='user' className='adaptation_user-icon'/>}
+								 	title={ <Link style={{color: '#1890ff'}} to={`/adaptations/${l.id}`} key={l.id}>{unescapeSymbols(l.name)}</Link>}
 								 	description={l.status}
 								 />
 								
