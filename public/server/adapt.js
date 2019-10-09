@@ -60,11 +60,18 @@ function getProcessSteps(role, stepId, action){
 
 
 function getNextUserId(crId, role){
+	var User = OpenCodeLib('x-local://wt/web/vsk/portal/adaptation/server/user.js');
+	DropFormsCache('x-local://wt/web/vsk/portal/adaptation/server/user.js');
+
 	var doc = OpenDoc(UrlFromDocID(Int(crId)));
 
 	var udoc = OpenDoc(UrlFromDocID(Int(doc.TopElem.person_id)));
-	if (udoc.TopElem.access.access_role == role){
-		return doc.TopElem.person_id;
+	var isAdaptation = ArrayOptFind(udoc.TopElem.custom_elems, 'This.name == \'is_adaptation\'');
+	if (isAdaptation != undefined){
+		var types = User.getManagerTypes();
+		if (isAdaptation.value == 'true' && types.user == role) {
+			return doc.TopElem.person_id;
+		}
 	}
 
 	for (el in doc.TopElem.tutors){

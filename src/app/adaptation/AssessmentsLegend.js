@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { Alert, Table, Tag } from 'antd';
+import { Table, Tag } from 'antd';
 
 class AssessmentsLegend extends Component {
 	render() {
@@ -9,23 +9,22 @@ class AssessmentsLegend extends Component {
 				...a
 			}
 		});
+
+		const { style } = this.props;
 		return (
-			<div className='adaptation__legend'>
-				<span className='adaptation__legend-title ant-page-header-heading-title'>Внимательно прочитайте инструкцию перед заполнением!</span>
-				<Table className='adaptation__legend_table' pagination={false} dataSource={source} columns={[
-					{
-						title: 'Оценка',
-						dataIndex: 'name',
-						key: 'name',
-						render: (text, record) => <Tag color={record.color}>{text}</Tag>
-					},
-					{
-						title: 'Описание',
-						dataIndex: 'description',
-						key: 'description'
-					}
-				]} />
-			</div>
+			<Table style={style} bordered={false} showHeader={false} className='adaptation__legend_table' pagination={false} dataSource={source} columns={[
+				{
+					title: '',
+					dataIndex: 'name',
+					key: 'name',
+					render: (text, record) => <Tag color={record.color}>{text}</Tag>
+				},
+				{
+					title: '',
+					dataIndex: 'description',
+					key: 'description'
+				}
+			]} />
 		);
 	}
 }

@@ -16,7 +16,7 @@ class AdaptationList extends Component {
 								key={l.id}
 							>
 								 <List.Item.Meta
-								 	avatar={<Icon type='user' className='adaptation_user-icon'/>}
+								 	avatar={<Icon type='user' className='adaptation_user-icon adaptation_user-icon-no-margin'/>}
 								 	title={ <Link style={{color: '#1890ff'}} to={`/adaptations/${l.id}`} key={l.id}>{unescapeSymbols(l.name)}</Link>}
 								 	description={l.status}
 								 />

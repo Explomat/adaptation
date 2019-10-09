@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
 import {
-	Icon, Modal, Input, Divider, Select, Tag, Button
+	Icon, Divider, Tag
 } from 'antd';
 import TaskForm from './taskForm';
 import { renderDate } from '../../utils/date';
@@ -66,10 +66,18 @@ class Task extends Component {
 					{achieved_result}
 				</td>
 				<td>
-					{collaborator_assessment && <Tag color={defaultCollaboratorAssessment.color}>{collaborator_assessment}</Tag>}
+					{collaborator_assessment && (
+						<div title={defaultCollaboratorAssessment.description}>
+							<Tag color={defaultCollaboratorAssessment.color}>{collaborator_assessment}</Tag>
+						</div>
+					)}
 				</td>
 				<td>
-					{manager_assessment && <Tag color={defaultManagerAssessment.color}>{manager_assessment}</Tag>}
+					{manager_assessment && (
+						<div title={defaultManagerAssessment.description}>
+							<Tag color={defaultManagerAssessment.color}>{manager_assessment}</Tag>
+						</div>
+					)}
 				</td>
 				{meta.allow_edit_tasks && (<td>
 					<span>
@@ -85,57 +93,6 @@ class Task extends Component {
 					onCancel={this.handleToggleModal}
 					{...this.props}
 				/>
-				{/*<Modal
-					title='Редактирование'
-					visible={isShowModal}
-					onOk={this.handleUpdate}
-					onCancel={this.handleToggleModal}
-					footer={[
-						<Button type='primary' key='submit' onClick={this.handleUpdate}>
-							Ok
-						</Button>,
-						<Button key='cancel' onClick={this.handleToggleModal}>
-							Отмена
-						</Button>
-					]}
-				>
-					<label className='adaptation__form-label'>Цель</label>
-					<Input placeholder='Укажите вашу цель' value={name} onChange={e => this.handleChangeProp('name', e.target.value)}/>
-					<div style={{ margin: '24px 0' }} />
-					<label className='adaptation__form-label'>Ожидаемый результат</label>
-					<Input.TextArea
-						placeholder='Опишите ожидаемый результат'
-						value={expected_result}
-						autosize={{ minRows: 3}}
-						onChange={e => this.handleChangeProp('expected_result', e.target.value)}
-					/>
-					<div style={{ margin: '24px 0' }} />
-					<label className='adaptation__form-label'>Достигнутый результат</label>
-					<Input.TextArea
-						placeholder='Опишите достигнутый результат'
-						value={achieved_result}
-						autosize={{ minRows: 3}}
-						onChange={e => this.handleChangeProp('achieved_result', e.target.value)}
-					/>
-					<div style={{ margin: '24px 0' }} />
-					<label className='adaptation__form-label'>Оценка сотрудника</label>
-					<Select disabled={!meta.allow_edit_collaborator_assessment} defaultValue={defaultCollaboratorAssessment.name} onChange={value => this.handleChangeProp('collaborator_assessment', value)}>
-						{meta.assessments && meta.assessments.map(a => {
-							return (
-								<Select.Option key={a.id} value={a.name}>{a.name}</Select.Option>
-							);
-						})}
-					</Select>
-					<div style={{ margin: '24px 0' }} />
-					<label className='adaptation__form-label'>Оценка руководителя</label>
-					<Select disabled={!meta.allow_edit_manager_assessment} defaultValue={defaultManagerAssessment.name} onChange={value => this.handleChangeProp('manager_assessment', value)}>
-						{meta.assessments && meta.assessments.map(a => {
-							return (
-								<Select.Option key={a.id} value={a.name}>{a.name}</Select.Option>
-							);
-						})}
-					</Select>
-				</Modal>*/}
 			</tr>
 		);
 	}

@@ -1,7 +1,8 @@
 import React, { Component } from 'react';
 import { Modal, Input, Select, Button } from 'antd';
+import AssessmentsLegend from './assessmentsLegend';
 
-class Task extends Component {
+class TaskForm extends Component {
 
 	constructor(props){
 		super(props);
@@ -19,7 +20,7 @@ class Task extends Component {
 	}
 
 	handleCommit(){
-		const { onCommit, onCancel } = this.props;
+		const { onCommit } = this.props;
 		onCommit(this.state);
 	}
 
@@ -64,13 +65,18 @@ class Task extends Component {
 				]}
 			>
 				<label className='adaptation__form-label'>Цель</label>
-				<Input placeholder='Укажите вашу цель' value={name} onChange={e => this.handleChangeProp('name', e.target.value)}/>
+				<Input.TextArea
+					placeholder='Укажите вашу цель'
+					value={name}
+					autosize={{ minRows: 2, maxRows: 3}}
+					onChange={e => this.handleChangeProp('name', e.target.value)}
+				/>
 				<div style={{ margin: '24px 0' }} />
 				<label className='adaptation__form-label'>Ожидаемый результат</label>
 				<Input.TextArea
 					placeholder='Опишите ожидаемый результат'
 					value={expected_result}
-					autosize={{ minRows: 3}}
+					autosize={{ minRows: 3, maxRows: 6}}
 					onChange={e => this.handleChangeProp('expected_result', e.target.value)}
 				/>
 				<div style={{ margin: '24px 0' }} />
@@ -78,12 +84,16 @@ class Task extends Component {
 				<Input.TextArea
 					placeholder='Опишите достигнутый результат'
 					value={achieved_result}
-					autosize={{ minRows: 3}}
+					autosize={{ minRows: 3, maxRows: 6}}
 					onChange={e => this.handleChangeProp('achieved_result', e.target.value)}
 				/>
 				<div style={{ margin: '24px 0' }} />
 				<label className='adaptation__form-label'>Оценка сотрудника</label>
-				<Select disabled={!meta.allow_edit_collaborator_assessment} defaultValue={defaultCollaboratorAssessment.name} onChange={value => this.handleChangeProp('collaborator_assessment', value)}>
+				<Select
+					disabled={!meta.allow_edit_collaborator_assessment}
+					defaultValue={defaultCollaboratorAssessment.name}
+					onChange={value => this.handleChangeProp('collaborator_assessment', value)}
+				>
 					{meta.assessments && meta.assessments.map(a => {
 						return (
 							<Select.Option key={a.id} value={a.name}>{a.name}</Select.Option>
@@ -92,16 +102,21 @@ class Task extends Component {
 				</Select>
 				<div style={{ margin: '24px 0' }} />
 				<label className='adaptation__form-label'>Оценка руководителя</label>
-				<Select disabled={!meta.allow_edit_manager_assessment} defaultValue={defaultManagerAssessment.name} onChange={value => this.handleChangeProp('manager_assessment', value)}>
+				<Select
+					disabled={!meta.allow_edit_manager_assessment}
+					defaultValue={defaultManagerAssessment.name}
+					onChange={value => this.handleChangeProp('manager_assessment', value)}
+				>
 					{meta.assessments && meta.assessments.map(a => {
 						return (
 							<Select.Option key={a.id} value={a.name}>{a.name}</Select.Option>
 						);
 					})}
 				</Select>
+				{meta.is_show_assessments && <AssessmentsLegend style={{ marginTop: '20px' }} assessments={meta.assessments}/>}
 			</Modal>
 		);
 	}
 }
 
-export default Task;
+export default TaskForm;

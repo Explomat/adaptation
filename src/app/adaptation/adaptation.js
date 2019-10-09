@@ -1,9 +1,8 @@
 import React, { Component } from 'react';
 import { withRouter } from 'react-router';
-import { List, Icon, Button, Modal, Input, PageHeader, Row, Col, Steps, Card, Select, Tag } from 'antd';
+import { List, Icon, Button, Modal, Input, PageHeader, Row, Col, Steps, Card, Tag } from 'antd';
 import Task from './task';
 import TaskForm from './taskForm';
-import AssessmentsLegend from './assessmentsLegend';
 import { pureUrl } from '../../utils/request';
 import { renderDate } from '../../utils/date';
 import { connect } from 'react-redux';
@@ -61,7 +60,7 @@ class AdaptationView extends Component {
 	}
 
 	handeAction(action){
-		const { changeStep, card } = this.props;
+		const { changeStep } = this.props;
 
 		if (action.allow_additional_data === 'true'){
 			this.currentAction = action;
@@ -272,10 +271,20 @@ class AdaptationView extends Component {
 													<td></td>
 													<td></td>
 													<td style={{ fontWeight: 'bold', padding: '16px' }}>
-														Итоговая оценка:
+														{(collaboratorAssessement || managerAssessement) && 'Итоговая оценка:'}
 													</td>
-													<td style={{ padding: '16px' }}>{collaboratorAssessement && <Tag color={collaboratorAssessement.color}>{collaboratorAssessement.name}</Tag>}</td>
-													<td style={{ padding: '16px' }}>{managerAssessement && <Tag color={managerAssessement.color}>{managerAssessement.name}</Tag>}</td>
+													<td style={{ padding: '16px' }}>{collaboratorAssessement && (
+														<div title={collaboratorAssessement.description}>
+															<Tag color={collaboratorAssessement.color}>{collaboratorAssessement.name}</Tag>
+														</div>
+													)}
+													</td>
+													<td style={{ padding: '16px' }}>{managerAssessement && (
+														<div title={managerAssessement.description}>
+															<Tag color={managerAssessement.color}>{managerAssessement.name}</Tag>
+														</div>
+													)}
+													</td>
 													<td></td>
 												</tr>}
 											</tfoot>
@@ -295,16 +304,13 @@ class AdaptationView extends Component {
 		if (ui.isLoading){
 			return null;
 		}
-		const { isShowModalTask, task } = this.state;
+		const { isShowModalTask } = this.state;
 		const { isShowModalComment, comment } = this.state;
-		const defaultCollaboratorAssessment = meta.assessments && meta.assessments[0];
-		const defaultManagerAssessment = meta.assessments && meta.assessments[0];
 		return (
 			<div className='adaptation'>
 				{ this.renderHeader() }
 				<div className='adaptation__body'>
 					{ this.renderMainSteps() }
-					{meta.is_show_assessments && <AssessmentsLegend assessments={meta.assessments}/>}
 					<Card
 						className='adaptation__tasks'
 						title='Мои задачи'

@@ -1,5 +1,6 @@
 function getManagerTypes(){
 	return {
+		user: 'adaptation:new_collaborator',
 		manager: 'adaptation:manager',
 		curator: 'adaptation:curator'
 	}
@@ -12,7 +13,13 @@ function getById(id){
 function getRole(userId, crId){
 	var q = ArrayOptFirstElem(XQuery('for $el in career_reserves where $el/id = ' + crId + ' and $el/person_id = ' + userId + ' and $el/status = \'active\' return $el'));
 	if (q != undefined) {
-		return OpenDoc(UrlFromDocID(Int(q.person_id))).TopElem.access.access_role;
+		var pdoc = OpenDoc(UrlFromDocID(Int(q.person_id)));
+		var isAdaptation = ArrayOptFind(pdoc.TopElem.custom_elems, 'This.name == \'is_adaptation\'');
+		if (isAdaptation != undefined){
+			if (isAdaptation.value == 'true') {
+				return getManagerTypes().user;
+			}
+		}
 	}
 
 	if (crId != undefined){

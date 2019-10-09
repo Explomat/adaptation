@@ -6,31 +6,16 @@
 	margin-bottom: 8px;
 }
 
-.adaptation__legend{
-	background-color: #e6f7ff;
-    color: black;
-    border: 1px solid #91d5ff;
-    padding: 8px 15px;
-    -webkit-box-sizing: border-box;
-    box-sizing: border-box;
-    margin: 0;
-    padding: 0;
-    color: rgba(0,0,0,0.65);
-    font-size: 14px;
-    font-variant: tabular-nums;
-    line-height: 1.5;
-    list-style: none;
-    -webkit-font-feature-settings: 'tnum';
-    font-feature-settings: 'tnum';
-    position: relative;
-    padding: 8px 15px 8px 37px;
-    word-wrap: break-word;
-    border-radius: 4px;
-    margin-bottom: 30px;
-}
-
 .adaptation__legend_table {
 	background-color: #fff;
+}
+
+.adaptation__legend_table tbody {
+	font-size: 11px;
+}
+
+.adaptation__legend_table td {
+	padding: 0px 0px !important;
 }
 
 .adaptation__form-label{

@@ -1,5 +1,5 @@
 <%//Server.Execute(AppDirectoryPath() + '/wt/web/include/access_init.html');
-//curUserID = 6719948502038810952; // Volk
+curUserID = 6719948502038810952; // Volk
 //curUserID = 6719948317677868197 // Zayts
 //curUserID = 6719948498605842349; //Markin
 //urUserID = 6711785032659205612; //Me
@@ -62,6 +62,9 @@ function get_Adaptations(queryObjects){
 		var currentStep = Adaptation.getCurrentStep(crdoc.DocID);
 		//Utils.setError('crdoc.DocID: ' + crdoc.DocID);
 		var urole = User.getRole(curUserID, crdoc.DocID);
+/*		alert('urole_1: ' + urole);
+		alert('curUserID: ' + curUserID);
+		alert('crdoc.DocID: ' + crdoc.DocID);*/
 		//Utils.setError('urole: ' + urole);
 		var uactions = User.getActionsByRole(urole, currentStep.step_id);
 
@@ -127,8 +130,6 @@ function get_Adaptations(queryObjects){
 		}));
 	}
 
-	alert('TTTT: ')
-	alert('curUserID: ' + curUserID);
 	var q = XQuery("sql: \n\
 		select \n\
 			crs.id, \n\
@@ -145,6 +146,7 @@ function get_Adaptations(queryObjects){
 
 function get_Curators(queryObjects){
 	var urole = User.getRole(curUserID);
+	//alert('urole: ' + urole);
 	var curators = Adaptation.getCurators(curUserID, urole);
 	return Utils.toJSON(Utils.setSuccess(curators));
 }
