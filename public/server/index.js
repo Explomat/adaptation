@@ -2,7 +2,9 @@
 curUserID = 6719948502038810952; // Volk
 //curUserID = 6719948317677868197 // Zayts
 //curUserID = 6719948498605842349; //Markin
-//urUserID = 6711785032659205612; //Me
+//curUserID = 6711785032659205612; //Me
+
+
 var Adaptation = OpenCodeLib('x-local://wt/web/vsk/portal/adaptation/server/adapt.js');
 DropFormsCache('x-local://wt/web/vsk/portal/adaptation/server/adapt.js');
 
@@ -15,19 +17,21 @@ DropFormsCache('x-local://wt/web/vsk/portal/adaptation/server/utils.js');
 var User = OpenCodeLib('x-local://wt/web/vsk/portal/adaptation/server/user.js');
 DropFormsCache('x-local://wt/web/vsk/portal/adaptation/server/user.js');
 
-function get_Adaptations(queryObjects){
 
+function get_Adaptations(queryObjects){
 	function getTutorsCards(tId, tRole){
 		return XQuery("sql: \n\
 			select \n\
 				c.id, \n\
 				c.name, \n\
-				c.status \n\
+				c.status, \n\
+				c.[type] \n\
 			from ( \n\
 				select \n\ 
 					distinct(crs.id), \n\ 
 					cs.fullname + ' (' + cs.position_name + ')' [name], \n\
 					crst.name status, \n\
+					ccac.title [type], \n\
 					t.p.query('boss_type_id').value('.','varchar(50)') boss_type_id, \n\
 					t.p.query('person_id').value('.','varchar(50)') tutor_id \n\
 				from  \n\
@@ -35,6 +39,7 @@ function get_Adaptations(queryObjects){
 				inner join career_reserve cr on cr.id = crs.id \n\
 				inner join collaborators cs on cs.id = crs.person_id \n\
 				inner join cc_custom_adaptations cas on cas.career_reserve_id = crs.id \n\
+				inner join cc_adaptation_types ccac on ccac.id = cas.type_id \n\
 				inner join [common.career_reserve_status_types] crst on crst.id = crs.status \n\
 				cross apply cr.data.nodes('/career_reserve/tutors/tutor') as t(p) \n\
 			) c \n\
@@ -105,6 +110,7 @@ function get_Adaptations(queryObjects){
 			tutorId = curUserID;
 		}
 
+
 		var bossTypes = User.getManagerTypes();
 		var tutorRole = queryObjects.HasProperty('tutor_role') ? Trim(queryObjects.tutor_role) : bossTypes.curator;
 		var isCurator =  queryObjects.HasProperty('is_curator') ? Trim(queryObjects.is_curator) : undefined;
@@ -132,12 +138,15 @@ function get_Adaptations(queryObjects){
 
 	var q = XQuery("sql: \n\
 		select \n\
-			crs.id, \n\
+			distinct(crs.id), \n\
 			cs.fullname + ' (' + cs.position_name + ')' [name], \n\
-			crst.name [status] \n\
+			crst.name [status], \n\
+			ccac.title [type] \n\
 		from career_reserves crs \n\
 		inner join [common.career_reserve_status_types] crst on crst.id = crs.status \n\
 		inner join collaborators cs on cs.id = crs.person_id \n\
+		inner join cc_custom_adaptations ccca on ccca.career_reserve_id = crs.id \n\
+		inner join cc_adaptation_types ccac on ccac.id = ccca.type_id \n\
 		where \n\
 			crs.person_id = " + curUserID + " \n\
 	");

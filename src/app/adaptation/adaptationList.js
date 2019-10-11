@@ -17,10 +17,14 @@ class AdaptationList extends Component {
 							>
 								 <List.Item.Meta
 								 	avatar={<Icon type='user' className='adaptation_user-icon adaptation_user-icon-no-margin'/>}
-								 	title={ <Link style={{color: '#1890ff'}} to={`/adaptations/${l.id}`} key={l.id}>{unescapeSymbols(l.name)}</Link>}
+								 	title={
+								 		<div>
+								 			<div className='adaptation_list-item'>{l.type}</div>
+								 			<Link style={{color: '#1890ff'}} to={`/adaptations/${l.id}`} key={l.id}>{unescapeSymbols(l.name)}</Link>
+								 		</div>
+								 	}
 								 	description={l.status}
 								 />
-								
 							</List.Item>
 						)
 					})}

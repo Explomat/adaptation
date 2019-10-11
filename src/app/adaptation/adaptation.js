@@ -173,7 +173,6 @@ class AdaptationView extends Component {
 												 		<span className='adaptation__date'>{renderDate(t.created_date)}</span>
 												 		<span className='adaptation__history-step'>{t.main_step} / {t.step}</span>
 												 	</span>}
-												 	description={t.type}
 												 />
 												 {t.collaborator} <Icon type='arrow-right' /> {t.object}
 												 {t.data && (
