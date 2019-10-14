@@ -52,7 +52,7 @@ class TaskForm extends Component {
 		return (
 			<Modal
 				title={title}
-				visible={visible}
+				visible={true}
 				onOk={this.handleCommit}
 				onCancel={onCancel}
 				footer={[

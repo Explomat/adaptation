@@ -86,13 +86,12 @@ class Task extends Component {
 						<Icon className='task__icon' type='delete' onClick={() => removeTask(id)}/>
 					</span>
 				</td>)}
-				<TaskForm
+				{isShowModal && <TaskForm
 					title='Редактирование'
-					visible={isShowModal}
 					onCommit={this.handleUpdate}
 					onCancel={this.handleToggleModal}
 					{...this.props}
-				/>
+				/>}
 			</tr>
 		);
 	}

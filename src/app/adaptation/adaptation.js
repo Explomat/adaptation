@@ -338,13 +338,12 @@ class AdaptationView extends Component {
 					>
 						{this.renderTasks()}
 					</Card>
-					<TaskForm
+					{isShowModalTask && <TaskForm
 						title='Новая задача'
-						visible={isShowModalTask}
 						onCommit={this.handleAddTask}
 						onCancel={this.handleToggleTaskModal}
 						meta={meta}
-					/>
+					/>}
 					<Modal
 						title='Сообщение'
 						visible={isShowModalComment}
