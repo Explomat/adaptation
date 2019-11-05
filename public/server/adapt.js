@@ -22,7 +22,7 @@ function getCurrentStep(crid){
 			ca.object_id, \n\
 			ca.step_id, \n\
 			ast.order_number, \n\
-			ams.title as main_step \n\
+			ams.order_number as main_step \n\
 		from \n\
 			cc_custom_adaptations ca \n\
 		inner join cc_adaptation_steps ast on ast.id = ca.step_id \n\
@@ -307,10 +307,10 @@ function newObject(param){
 			convert(varchar(max), ams.id) id, \n\
 			ams.description, \n\
 			ams.duration, \n\
-			ams.title, \n\
+			ams.order_number, \n\
 			ams.type_id \n\
 		from cc_adaptation_main_steps ams \n\
-		order by ams.duration asc \n\
+		order by ams.order_number asc \n\
 	");
 
 	var ms = [];
@@ -320,7 +320,7 @@ function newObject(param){
 			id: String(s.id),
 			description: String(s.description),
 			duration: String(s.duration),
-			title: String(s.title),
+			title: String(s.order_number),
 			type_id: String(s.type_id),
 			date: StrXmlDate(Date(startDate))
 		}
@@ -331,10 +331,11 @@ function newObject(param){
 			d = OptInt(s.duration);
 			if (d != undefined){
 				_date = new Date(startDate);
-				nextMonth = (Month(new Date(_date)) % 12) + d;
+				nextMonth = (Month(_date) + d) % 12;
+				nextMonth = nextMonth == 0 ? 12 : nextMonth;
 				nextDay = Day(_date);
 				nextYear = Year(_date);
-				if (nextMonth == 1) {
+				if ((Month(_date) + d) > 12) {
 					nextYear = nextYear + 1;
 				}
 
@@ -344,6 +345,7 @@ function newObject(param){
 						nextDay = 29;
 					}
 				}
+
 				obj.date = StrXmlDate(Date(nextDay + '.' + nextMonth + '.' + nextYear));
 			}
 		}

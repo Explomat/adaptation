@@ -71,6 +71,7 @@ class App extends Component {
 					<Tabs.TabPane tab='Мои кураторы' key={this.routes.managers} />
 				</Tabs>
 				
+				<Route exact path='/' component={Adaptation}/>
 				<Route exact path={this.routes.adaptations} component={Adaptation}/>
 				<Route exact path={this.routes.curators} component={Curator}/>
 				<Route exact path={this.routes.managers} component={Manager}/>
