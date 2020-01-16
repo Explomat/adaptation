@@ -2,8 +2,8 @@
 //curUserID = 6719948502038810952; // Volk
 //curUserID = 6719948317677868197 // Zayts
 //curUserID = 6719948498605842349; //Markin
-//curUserID = 6711785032659205612; //Me
-
+curUserID = 6711785032659205612; //Me
+//curUserID = 6719948520442319663; //Kazina
 
 var Adaptation = OpenCodeLib('x-local://wt/web/vsk/portal/adaptation/server/adapt.js');
 DropFormsCache('x-local://wt/web/vsk/portal/adaptation/server/adapt.js');
@@ -63,26 +63,41 @@ function get_Adaptations(queryObjects){
 		return (userRole == btypes.manager || (userRole == 'admin'))
 	}
 
+	function isEditAdaptation(_crDoc, _currentStep) {
+		var lastMainStep = Adaptation.getLastMainStep();
+		var lastStepInMain = Adaptation.getLastStepByMainStepId(_crDoc.DocID, _currentStep.main_step);
+		
+		if (
+			_currentStep.main_step == lastMainStep.order_number 
+			&& _currentStep.order_number == lastStepInMain.order_number
+		) {
+			return false;
+		}
+		return true;
+	}
+
 	function toResponse(crdoc){
 		var currentStep = Adaptation.getCurrentStep(crdoc.DocID);
-		//Utils.setError('crdoc.DocID: ' + crdoc.DocID);
 		var urole = User.getRole(curUserID, crdoc.DocID);
-		/*alert('urole_1: ' + urole);
-		alert('curUserID: ' + curUserID);
-		alert('crdoc.DocID: ' + crdoc.DocID);*/
-		//Utils.setError('urole: ' + urole);
 		var uactions = User.getActionsByRole(urole, currentStep.step_id);
 
 		var data = Adaptation.newObject(crdoc);
+		var isEditAdapt = isEditAdaptation(crdoc, currentStep);
 		var isEdit = isAlowEditTasks(currentStep, urole);
 		var ats = Adaptation.getAssessments();
+		var isStep = OptInt(currentStep.main_step) > 0;
+		var isUserOrManager = (isUser(crdoc, urole) || isManager(urole));
+
 		data.meta = {
 			actions: uactions,
 			assessments: ats,
-			is_show_assessments: true,
-			allow_edit_tasks: isEdit,
-			allow_edit_collaborator_assessment: (isEdit && isUser(crdoc, urole)),
-			allow_edit_manager_assessment: (isEdit && isManager(urole))
+			is_show_assessments: isEdit && isStep && isUserOrManager,
+			allow_edit_target: isEditAdapt && OptInt(currentStep.main_step) == 0 && isEdit && isUserOrManager, // цель
+			allow_edit_expected_result: isEditAdapt && OptInt(currentStep.main_step) == 0 && isEdit && isUserOrManager, // ожидаемый результат
+			allow_edit_achieved_result: isEditAdapt && isEdit && isStep && isUserOrManager, // Достигнутый результат
+			allow_edit_tasks: isEditAdapt && isEdit,
+			allow_edit_collaborator_assessment: isEditAdapt && (isEdit && isStep && isUser(crdoc, urole)),
+			allow_edit_manager_assessment: isEditAdapt && (isEdit && isStep && isManager(urole))
 		}
 		return data;
 	}

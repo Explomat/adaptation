@@ -14,6 +14,77 @@ function getAssessments(){
 	");
 }
 
+function getSteps(){
+	return XQuery("sql: \n\
+		select ccas.* \n\
+		from cc_adaptation_steps ccas \n\
+	")
+}
+
+function getMainSteps(){
+	return XQuery("sql: \n\
+		select \n\
+			convert(varchar(max), ams.id) id, \n\
+			ams.description, \n\
+			ams.duration, \n\
+			ams.order_number, \n\
+			ams.type_id \n\
+		from cc_adaptation_main_steps ams \n\
+		order by ams.order_number asc \n\
+	");
+}
+
+function getLastStep(){
+	return ArrayOptFirstElem(XQuery("sql: \n\
+		select ccas.* \n\
+		from cc_adaptation_steps ccas \n\
+		inner join ( \n\
+			select \n\
+				max(order_number) orn \n\
+			from cc_adaptation_steps \n\
+		) c on c.orn = ccas.order_number \n\
+	"));
+}
+
+function getLastMainStep(){
+	return ArrayOptFirstElem(XQuery("sql: \n\
+		select ccas.* \n\
+		from cc_adaptation_main_steps ccas \n\
+		inner join ( \n\
+			select \n\
+				max(order_number) orn \n\
+			from cc_adaptation_main_steps \n\
+		) c on c.orn = ccas.order_number \n\
+	"));
+}
+
+function getLastStepByMainStepId(crid, mainStepId){
+	return ArrayOptFirstElem(XQuery("sql: \n\
+		select \n\
+			ca.id, \n\
+			ca.collaborator_id, \n\
+			ca.object_id, \n\
+			ca.step_id, \n\
+			ast.order_number, \n\
+			ams.order_number as main_step \n\
+		from \n\
+			cc_custom_adaptations ca \n\
+		inner join ( \n\
+			select ccas.* \n\
+			from cc_adaptation_steps ccas \n\
+			inner join ( \n\
+				select \n\
+					max(order_number) orn \n\
+				from cc_adaptation_steps \n\
+			) c on c.orn = ccas.order_number \n\
+		) ast on ast.id = ca.step_id \n\
+		inner join cc_adaptation_main_steps ams on ams.id = ca.main_step_id \n\
+		where \n\
+			ca.career_reserve_id = " + crid + " \n\
+			and ams.id = " + mainStepId + " \n\
+	"))
+}
+
 function getCurrentStep(crid){
 	return ArrayOptFirstElem(XQuery("sql: \n\
 		select \n\
@@ -302,27 +373,23 @@ function newObject(param){
 	}
 
 
-	var mainSteps = XQuery("sql: \n\
-		select \n\
-			convert(varchar(max), ams.id) id, \n\
-			ams.description, \n\
-			ams.duration, \n\
-			ams.order_number, \n\
-			ams.type_id \n\
-		from cc_adaptation_main_steps ams \n\
-		order by ams.order_number asc \n\
-	");
-
+	var mainSteps = getMainSteps();
+	var _steps = getSteps();
+	//var currentStep = getCurrentStep(docCr.DocID);
 	var ms = [];
 
 	for (s in mainSteps){
+
+		lastStep = getLastStepByMainStepId(docCr.DocID, Int(s.id));
+
 		obj = {
 			id: String(s.id),
 			description: String(s.description),
 			duration: String(s.duration),
 			title: String(s.order_number),
 			type_id: String(s.type_id),
-			date: StrXmlDate(Date(startDate))
+			date: StrXmlDate(Date(startDate)),
+			is_approved: (lastStep != undefined),
 		}
 
 		if (s.duration == '0'){

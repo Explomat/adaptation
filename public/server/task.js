@@ -42,17 +42,17 @@ function create(crId, data){
 	customDoc.Save();
 
 	var obj = {};
-	for (el in task){
-		try {
-			obj.SetProperty(el.Name, String(el.Value));
-		} catch(e) {}
-	}
 	for (el in customDoc.TopElem){
 		try {
 			obj.SetProperty(el.Name, String(el.Value));
 		} catch(e) {}
 	}
-
+	for (el in task){
+		try {
+			obj.SetProperty(el.Name, String(el.Value));
+		} catch(e) {}
+	}
+	
 	obj.created_date = StrXmlDate(Date(obj.created_date));
 	return obj;
 }

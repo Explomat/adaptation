@@ -90,7 +90,7 @@ class AdaptationView extends Component {
 	}
 
 	renderMainSteps(){
-		const { mainSteps, card } = this.props;
+		const { mainSteps, card, meta } = this.props;
 		const curStepIndex = mainSteps.findIndex(s => s.id === card.main_step_id);
 		return (
 			<div className='adaptation__steps'>
@@ -102,7 +102,7 @@ class AdaptationView extends Component {
 								title={
 									<span>
 										<span className='adaptation__date'>{renderDate(s.date)}</span>
-										{index <= curStepIndex ? <Icon className='adaptation__date-check' type='check'/> : null}
+										{s.is_approved ? <Icon className='adaptation__date-check' type='check'/> : null}
 									</span>
 								}
 								description={s.description}
@@ -206,7 +206,7 @@ class AdaptationView extends Component {
 					key: 'name'
 				},
 				{
-					title: 'Ожидаемый резултат',
+					title: 'Ожидаемый результат',
 					dataIndex: 'expected_result',
 					key: 'expected_result'
 				},

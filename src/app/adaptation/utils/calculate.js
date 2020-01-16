@@ -1,15 +1,17 @@
 export function calculatePercent(scales, rules) {
-	const _percents = scales.map(s =>{
-		for (var i = rules.length - 1; i >= 0; i--) {
-			if (s === ''){
-				return 0;
+	const _percents = scales
+		.filter(s => s !== '')
+		.map(s =>{
+			for (var i = rules.length - 1; i >= 0; i--) {
+				if (s === ''){
+					return 0;
+				}
+				if (rules[i].name === s){
+					return rules[i].percent;
+				}
 			}
-			if (rules[i].name === s){
-				return rules[i].percent;
-			}
-		}
-		return 0;
-	});
+			return 0;
+		});
 
 	const total = _percents.reduce((f, s) => {
 		return parseInt(f, 10) + parseInt(s, 10);

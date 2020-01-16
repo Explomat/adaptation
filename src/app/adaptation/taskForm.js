@@ -27,7 +27,7 @@ class TaskForm extends Component {
 
 	handleChangeProp(propName, value) {
 		this.setState({
-			[propName]: value
+			[propName]: value || ''
 		});
 	}
 
@@ -42,13 +42,15 @@ class TaskForm extends Component {
 		} = this.state;
 
 		let defaultCollaboratorAssessment = meta.assessments.find(a => a.name === collaborator_assessment);
-		if (!defaultCollaboratorAssessment){
+		defaultCollaboratorAssessment = defaultCollaboratorAssessment === undefined ? undefined : defaultCollaboratorAssessment.name;
+		/*if (!defaultCollaboratorAssessment){
 			defaultCollaboratorAssessment = meta.assessments[0];
-		}
+		}*/
 		let defaultManagerAssessment = meta.assessments.find(a => a.name === manager_assessment);
-		if (!defaultManagerAssessment){
+		defaultManagerAssessment = defaultManagerAssessment === undefined ? undefined : defaultManagerAssessment.name;
+		/*if (!defaultManagerAssessment){
 			defaultManagerAssessment = meta.assessments[0];
-		}
+		}*/
 		return (
 			<Modal
 				title={title}
@@ -66,6 +68,7 @@ class TaskForm extends Component {
 			>
 				<label className='adaptation__form-label'>Цель</label>
 				<Input.TextArea
+					disabled = {meta.allow_edit_target}
 					placeholder='Укажите вашу цель'
 					value={name}
 					autosize={{ minRows: 2, maxRows: 3}}
@@ -74,45 +77,56 @@ class TaskForm extends Component {
 				<div style={{ margin: '24px 0' }} />
 				<label className='adaptation__form-label'>Ожидаемый результат</label>
 				<Input.TextArea
+					disabled={meta.allow_edit_expected_result}
 					placeholder='Опишите ожидаемый результат'
 					value={expected_result}
 					autosize={{ minRows: 3, maxRows: 6}}
 					onChange={e => this.handleChangeProp('expected_result', e.target.value)}
 				/>
 				<div style={{ margin: '24px 0' }} />
-				<label className='adaptation__form-label'>Достигнутый результат</label>
-				<Input.TextArea
-					placeholder='Опишите достигнутый результат'
-					value={achieved_result}
-					autosize={{ minRows: 3, maxRows: 6}}
-					onChange={e => this.handleChangeProp('achieved_result', e.target.value)}
-				/>
+				<div>
+					<label className='adaptation__form-label'>Достигнутый результат</label>
+					<Input.TextArea
+						disabled={meta.allow_edit_achieved_result}
+						placeholder='Опишите достигнутый результат'
+						value={achieved_result}
+						autosize={{ minRows: 3, maxRows: 6}}
+						onChange={e => this.handleChangeProp('achieved_result', e.target.value)}
+					/>
+				</div>
 				<div style={{ margin: '24px 0' }} />
-				<label className='adaptation__form-label'>Оценка сотрудника</label>
-				<Select
-					disabled={!meta.allow_edit_collaborator_assessment}
-					defaultValue={defaultCollaboratorAssessment.name}
-					onChange={value => this.handleChangeProp('collaborator_assessment', value)}
-				>
-					{meta.assessments && meta.assessments.map(a => {
-						return (
-							<Select.Option key={a.id} value={a.name}>{a.name}</Select.Option>
-						);
-					})}
-				</Select>
+				<div>
+					<label className='adaptation__form-label'>Оценка сотрудника</label>
+					<Select
+						disabled={meta.allow_edit_collaborator_assessment}
+						allowClear
+						defaultValue={defaultCollaboratorAssessment}
+						onChange={value => this.handleChangeProp('collaborator_assessment', value)}
+					>
+						{meta.assessments && meta.assessments.map(a => {
+							return (
+								<Select.Option key={a.id} value={a.name}>{a.name}</Select.Option>
+							);
+						})}
+					</Select>
+				</div>)
+				
 				<div style={{ margin: '24px 0' }} />
-				<label className='adaptation__form-label'>Оценка руководителя</label>
-				<Select
-					disabled={!meta.allow_edit_manager_assessment}
-					defaultValue={defaultManagerAssessment.name}
-					onChange={value => this.handleChangeProp('manager_assessment', value)}
-				>
-					{meta.assessments && meta.assessments.map(a => {
-						return (
-							<Select.Option key={a.id} value={a.name}>{a.name}</Select.Option>
-						);
-					})}
-				</Select>
+				<div>
+					<label className='adaptation__form-label'>Оценка руководителя</label>
+					<Select
+						disabled={meta.allow_edit_manager_assessment}
+						allowClear
+						defaultValue={defaultManagerAssessment}
+						onChange={value => this.handleChangeProp('manager_assessment', value)}
+					>
+						{meta.assessments && meta.assessments.map(a => {
+							return (
+								<Select.Option key={a.id} value={a.name}>{a.name}</Select.Option>
+							);
+						})}
+					</Select>
+				</div>
 				{meta.is_show_assessments && <AssessmentsLegend style={{ marginTop: '20px' }} assessments={meta.assessments}/>}
 			</Modal>
 		);
