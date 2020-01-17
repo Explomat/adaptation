@@ -63,13 +63,29 @@ function get_Adaptations(queryObjects){
 		return (userRole == btypes.manager || (userRole == 'admin'))
 	}
 
-	function isEditAdaptation(_crDoc, _currentStep) {
-		var lastMainStep = Adaptation.getLastMainStep();
-		var lastStepInMain = Adaptation.getLastStepByMainStepId(_crDoc.DocID, _currentStep.main_step);
-		
-		if (
-			_currentStep.main_step == lastMainStep.order_number 
-			&& _currentStep.order_number == lastStepInMain.order_number
+	function isEditAdaptation(_crDoc, _curStep) {
+		var lst = Adaptation.getLastMainStep();
+		var lstm = Adaptation.getLastStepByMainStepId(_crDoc.DocID, _curStep.main_step_id);
+
+		/*alert('_crDoc.DocID:' + Int(_crDoc.DocID));
+		alert('_curStep.main_step:' + Int(_curStep.main_step));
+		alert('_curStep.main_step_id:' + Int(_curStep.main_step_id));
+		alert(tools.object_to_text(lstm, 'json'));
+			
+		//var a = lstm.order_number == _curStep.order_number;
+		alert(1);
+		alert('lstm.order_number: ' + lstm.order_number);
+		alert(2);
+		alert('_curStep.order_number: ' + _curStep.order_number);
+		alert(3);
+		alert('000000');
+*/
+		if (lstm == undefined) {
+			return true;
+		}
+
+		if ((_curStep.main_step == lst.order_number && _curStep.order_number == lstm.order_number)
+			|| (lstm.order_number == _curStep.order_number)
 		) {
 			return false;
 		}
@@ -77,16 +93,26 @@ function get_Adaptations(queryObjects){
 	}
 
 	function toResponse(crdoc){
+		//alert('_1');
 		var currentStep = Adaptation.getCurrentStep(crdoc.DocID);
+		//alert('_2');
 		var urole = User.getRole(curUserID, crdoc.DocID);
+		//alert('_3');
 		var uactions = User.getActionsByRole(urole, currentStep.step_id);
+		//alert('_4');
 
 		var data = Adaptation.newObject(crdoc);
+		//alert('_5');
 		var isEditAdapt = isEditAdaptation(crdoc, currentStep);
+		//alert('_6');
 		var isEdit = isAlowEditTasks(currentStep, urole);
+		//alert('_7');
 		var ats = Adaptation.getAssessments();
+		//alert('_8');
 		var isStep = OptInt(currentStep.main_step) > 0;
+		//alert('_9');
 		var isUserOrManager = (isUser(crdoc, urole) || isManager(urole));
+		//alert('_10');
 
 		data.meta = {
 			actions: uactions,

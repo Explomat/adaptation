@@ -68,7 +68,7 @@ class TaskForm extends Component {
 			>
 				<label className='adaptation__form-label'>Цель</label>
 				<Input.TextArea
-					disabled = {meta.allow_edit_target}
+					disabled = {!meta.allow_edit_target}
 					placeholder='Укажите вашу цель'
 					value={name}
 					autosize={{ minRows: 2, maxRows: 3}}
@@ -77,7 +77,7 @@ class TaskForm extends Component {
 				<div style={{ margin: '24px 0' }} />
 				<label className='adaptation__form-label'>Ожидаемый результат</label>
 				<Input.TextArea
-					disabled={meta.allow_edit_expected_result}
+					disabled={!meta.allow_edit_expected_result}
 					placeholder='Опишите ожидаемый результат'
 					value={expected_result}
 					autosize={{ minRows: 3, maxRows: 6}}
@@ -87,7 +87,7 @@ class TaskForm extends Component {
 				<div>
 					<label className='adaptation__form-label'>Достигнутый результат</label>
 					<Input.TextArea
-						disabled={meta.allow_edit_achieved_result}
+						disabled={!meta.allow_edit_achieved_result}
 						placeholder='Опишите достигнутый результат'
 						value={achieved_result}
 						autosize={{ minRows: 3, maxRows: 6}}
@@ -95,10 +95,9 @@ class TaskForm extends Component {
 					/>
 				</div>
 				<div style={{ margin: '24px 0' }} />
-				<div>
+				{meta.allow_edit_collaborator_assessment && (<div>
 					<label className='adaptation__form-label'>Оценка сотрудника</label>
 					<Select
-						disabled={meta.allow_edit_collaborator_assessment}
 						allowClear
 						defaultValue={defaultCollaboratorAssessment}
 						onChange={value => this.handleChangeProp('collaborator_assessment', value)}
@@ -109,13 +108,12 @@ class TaskForm extends Component {
 							);
 						})}
 					</Select>
-				</div>)
+				</div>)}
 				
 				<div style={{ margin: '24px 0' }} />
-				<div>
+				{meta.allow_edit_manager_assessment && (<div>
 					<label className='adaptation__form-label'>Оценка руководителя</label>
 					<Select
-						disabled={meta.allow_edit_manager_assessment}
 						allowClear
 						defaultValue={defaultManagerAssessment}
 						onChange={value => this.handleChangeProp('manager_assessment', value)}
@@ -126,7 +124,7 @@ class TaskForm extends Component {
 							);
 						})}
 					</Select>
-				</div>
+				</div>)}
 				{meta.is_show_assessments && <AssessmentsLegend style={{ marginTop: '20px' }} assessments={meta.assessments}/>}
 			</Modal>
 		);

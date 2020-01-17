@@ -93,7 +93,8 @@ function getCurrentStep(crid){
 			ca.object_id, \n\
 			ca.step_id, \n\
 			ast.order_number, \n\
-			ams.order_number as main_step \n\
+			ams.order_number as main_step, \n\
+			ca.main_step_id \n\
 		from \n\
 			cc_custom_adaptations ca \n\
 		inner join cc_adaptation_steps ast on ast.id = ca.step_id \n\
