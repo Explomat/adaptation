@@ -32,7 +32,7 @@ class TaskForm extends Component {
 	}
 
 	render() {
-		const { title, meta, visible, onCancel } = this.props;
+		const { title, meta, onCancel } = this.props;
 		const {
 			name,
 			expected_result,

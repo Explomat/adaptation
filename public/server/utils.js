@@ -28,3 +28,15 @@ function setError(message){
 function notificate(templateCode, primaryId, text, secondaryId){
 	tools.create_notification(templateCode, primaryId, text, secondaryId);
 }
+
+function splitFullname(fullname) {
+	var s = fullname.split(' ');
+	if (s.length != 3) {
+		return fullname;
+	}
+
+	var f = s[1];
+	var m = s[2];
+
+	return s[0] + ' ' + m.charAt(0) + '.' + f.charAt(0);
+}

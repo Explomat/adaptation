@@ -90,7 +90,7 @@ class AdaptationView extends Component {
 	}
 
 	renderMainSteps(){
-		const { mainSteps, card, meta } = this.props;
+		const { mainSteps, card } = this.props;
 		const curStepIndex = mainSteps.findIndex(s => s.id === card.main_step_id);
 		return (
 			<div className='adaptation__steps'>

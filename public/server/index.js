@@ -2,8 +2,9 @@
 //curUserID = 6719948502038810952; // Volk
 //curUserID = 6719948317677868197 // Zayts
 //curUserID = 6719948498605842349; //Markin
-curUserID = 6711785032659205612; //Me
+//curUserID = 6711785032659205612; //Me
 //curUserID = 6719948520442319663; //Kazina
+//curUserID = 6605152973250176182; //Levakov
 
 var Adaptation = OpenCodeLib('x-local://wt/web/vsk/portal/adaptation/server/adapt.js');
 DropFormsCache('x-local://wt/web/vsk/portal/adaptation/server/adapt.js');
@@ -306,7 +307,7 @@ function post_changeStep(queryObjects){
 	
 	var step = null;
 	var comment = data.HasProperty('comment') && data.GetOptProperty('comment') != 'undefined' ? data.comment : '';
-	Adaptation.createStep(
+	var nextStep = Adaptation.createStep(
 		currentStep.id,
 		{
 			collaborator_id: currentUserId,
@@ -316,7 +317,58 @@ function post_changeStep(queryObjects){
 		}
 	);
 
-	Utils.notificate('adaptation', nextUserId, null, currentUserId);
+
+	/* отправка уведомлений
+		1. Если этап идет вверх, то отсылаем уведомление на кого переведен этап, и остальным вниз по лесенке ролей относительно того, кто перевел.
+		2. Если этап идет вниз, то отсылаем всем вниз по лесенке ролей относительно того, кто перевел.
+	*/
+
+	var curUserRole = User.getRoleRecordByUserId(currentUserId, crid);
+	var nextUserRole = User.getRoleRecordByUserId(nextUserId, crid);
+
+	if (curUserRole != undefined && nextUserRole != undefined) {
+		var managerTypes = [];
+		// если порядковый номер следующего этапа больше текущего, значит лесенка вверх
+		if (OptInt(processStep.next_step_order_number) > OptInt(currentStep.order_number)) {
+			managerTypes = User.getNextManagerTypes(OptInt(curUserRole.order_number), OptInt(nextUserRole.order_number));
+		} else {
+			managerTypes = User.getPrevManagerTypes(OptInt(nextUserRole.order_number));
+		}
+
+		var _tutors = [];
+		var crDoc = OpenDoc(UrlFromDocID(Int(crid)));
+		for (mt in managerTypes) {
+			for (el in crDoc.TopElem.tutors) {
+				if (mt.boss_type_id == el.boss_type_id) {
+					_tutors.push(el.person_id);
+				}
+			}
+		}
+
+
+		var curUserDoc = OpenDoc(UrlFromDocID(Int(currentUserId)));
+		var nextUserDoc = OpenDoc(UrlFromDocID(Int(nextUserId)));
+		var _person = crDoc.TopElem.person_id.ForeignElem;
+
+		var objToNotificate = tools.object_to_text({
+			subject: ('Адаптация сотрудника ' + Utils.splitFullname(String(_person.fullname)) + '. ' + String(nextStep.TopElem.main_step_id.ForeignElem.description) + ' / ' + String(processStep.step_title)),
+			crid: OptInt(crid),
+			stepTitle: String(processStep.step_title),
+			from: {
+				fullname: curUserDoc.TopElem.fullname,
+				role: String(curUserRole.user_role_title)
+			},
+			to: {
+				fullname: nextUserDoc.TopElem.fullname,
+				role: String(nextUserRole.user_role_title)
+			}
+		}, 'json');
+
+		for (el in _tutors) {
+			Utils.notificate(processStep.notification_code, el, objToNotificate, crid);
+		}
+	}
+
 	return Utils.toJSON(Utils.setSuccess());
 }
 
@@ -413,7 +465,6 @@ function get_Report(queryObjects){
 	oCell = oWorksheet.Cells.GetCell('A' + rindex);
 	oCell.Value = 'ФИО';
 	oCell.Style.ForegroundColor = '#CCCCCC';
-	oCell.Style.VerticalAlignment = 'Center';
 	setMaxColWith(oCell.Value, 0);
 	//oCell.Style.IsBold = true;
 
@@ -423,9 +474,19 @@ function get_Report(queryObjects){
 	rindex = rindex + 1;
 
 	oCell = oWorksheet.Cells.GetCell('A' + rindex);
+	oCell.Value = 'Табельный номер';
+	oCell.Style.ForegroundColor = '#CCCCCC';
+	setMaxColWith(oCell.Value, 0);
+	//oCell.Style.IsBold = true;
+
+	oCell = oWorksheet.Cells.GetCell('B' + rindex);
+	oCell.Value = udoc.TopElem.code;
+	setMaxColWith(oCell.Value, 1);
+	rindex = rindex + 1;
+
+	oCell = oWorksheet.Cells.GetCell('A' + rindex);
 	oCell.Value = 'Поразделение';
 	oCell.Style.ForegroundColor = '#CCCCCC';
-	oCell.Style.VerticalAlignment = 'Center';
 	setMaxColWith(oCell.Value, 0);
 
 	oCell = oWorksheet.Cells.GetCell('B' + rindex);
@@ -436,7 +497,6 @@ function get_Report(queryObjects){
 	oCell = oWorksheet.Cells.GetCell('A' + rindex);
 	oCell.Value = 'Должность';
 	oCell.Style.ForegroundColor = '#CCCCCC';
-	oCell.Style.VerticalAlignment = 'Center';
 	setMaxColWith(oCell.Value, 0);
 
 	oCell = oWorksheet.Cells.GetCell('B' + rindex);
@@ -449,7 +509,6 @@ function get_Report(queryObjects){
 		oCell = oWorksheet.Cells.GetCell('A' + rindex);
 		oCell.Value = String(el.boss_fullname);
 		oCell.Style.ForegroundColor = '#CCCCCC';
-		oCell.Style.VerticalAlignment = 'Center';
 		setMaxColWith(oCell.Value, 0);
 
 		oCell = oWorksheet.Cells.GetCell('B' + rindex);
@@ -567,6 +626,81 @@ function get_Report(queryObjects){
 
 		rindex = rindex + 1;
 	}
+
+	rindex = rindex + 2;
+
+	oCell = oWorksheet.Cells.GetCell('A' + rindex);
+	oCell.Value = 'Должность';
+	oCell.Style.FontSize = 10;
+	oCell.Style.ForegroundColor = '#CCCCCC';
+	oCell.Style.IsBold = true;
+	oCell.Style.VerticalAlignment = 'Center';
+	setMaxColWith(oCell.Value, 0);
+
+	oCell = oWorksheet.Cells.GetCell('B' + rindex);
+	oCell.Value = 'ФИО';
+	oCell.Style.FontSize = 10;
+	oCell.Style.ForegroundColor = '#CCCCCC';
+	oCell.Style.IsBold = true;
+	oCell.Style.VerticalAlignment = 'Center';
+	setMaxColWith(oCell.Value, 1);
+
+	oCell = oWorksheet.Cells.GetCell('C' + rindex);
+	oCell.Value = 'Дата постановки целей ';
+	oCell.Style.FontSize = 10;
+	oCell.Style.ForegroundColor = '#CCCCCC';
+	oCell.Style.IsBold = true;
+	oCell.Style.VerticalAlignment = 'Center';
+	setMaxColWith(oCell.Value, 2);
+
+	oCell = oWorksheet.Cells.GetCell('D' + rindex);
+	oCell.Value = 'Подпись';
+	oCell.Style.FontSize = 10;
+	oCell.Style.ForegroundColor = '#CCCCCC';
+	oCell.Style.IsBold = true;
+	oCell.Style.VerticalAlignment = 'Center';
+	setMaxColWith(oCell.Value, 3);
+
+	oCell = oWorksheet.Cells.GetCell('E' + rindex);
+	oCell.Value = 'Дата утверждения результатов';
+	oCell.Style.FontSize = 10;
+	oCell.Style.ForegroundColor = '#CCCCCC';
+	oCell.Style.IsBold = true;
+	oCell.Style.VerticalAlignment = 'Center';
+	setMaxColWith(oCell.Value, 4);
+
+	oCell = oWorksheet.Cells.GetCell('F' + rindex);
+	oCell.Value = 'Подпись';
+	oCell.Style.FontSize = 10;
+	oCell.Style.ForegroundColor = '#CCCCCC';
+	oCell.Style.IsBold = true;
+	oCell.Style.VerticalAlignment = 'Center';
+	setMaxColWith(oCell.Value, 5);
+
+	rindex = rindex + 1;
+
+	for(el in _tutors){
+		oCell = oWorksheet.Cells.GetCell('A' + rindex);
+		oCell.Value = String(el.boss_type_name);
+		oCell.Style.VerticalAlignment = 'Center';
+		setMaxColWith(oCell.Value, 1);
+
+		oCell = oWorksheet.Cells.GetCell('B' + rindex);
+		oCell.Value = String(el.boss_fullname);
+		oCell.Style.VerticalAlignment = 'Center';
+		setMaxColWith(oCell.Value, 0);
+		rindex = rindex + 1;
+	}
+	oCell = oWorksheet.Cells.GetCell('A' + rindex);
+	oCell.Value = "Специалист";
+	oCell.Style.VerticalAlignment = 'Center';
+	setMaxColWith(oCell.Value, 1);
+
+	oCell = oWorksheet.Cells.GetCell('B' + rindex);
+	oCell.Value = String(udoc.TopElem.fullname);
+	oCell.Style.VerticalAlignment = 'Center';
+	setMaxColWith(oCell.Value, 0);
+	rindex = rindex + 1;
 	//alert(tools.object_to_text(colWidths, 'json'));
 
 	for (i = 0; i < colWidths.length; i++){

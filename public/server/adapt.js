@@ -117,11 +117,14 @@ function getProcessSteps(role, stepId, action){
 			when ars.next_role is null then ars.role \n\
 			end next_role, \n\
 			ars.step, \n\
+			ast.title step_title, \n\
+			ns.code notification_code, \n\
 			ast.order_number next_step_order_number \n\
 		from \n\
 			cc_adaptation_role_operations ars \n\
 		inner join cc_adaptation_operations aps on aps.id = ars.operation_id \n\
 		inner join cc_adaptation_steps ast on ast.id = ars.next_step \n\
+		inner join notifications ns on ns.id = ars.notification_type \n\
 		where \n\
 			ars.role = '" + role + "' \n\
 			and ars.step = " + stepId + " \n\

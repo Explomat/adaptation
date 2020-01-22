@@ -57,7 +57,7 @@ class Curator extends Component {
 						onBack={history.goBack}
 						title={curator_fullname}
 					>
-						<div className='curators__tutor-header'>Адаптация сотрудников</div>
+						<div className='curators__tutor-header'>Сотрудники на адаптации</div>
 						<AdaptationList list={adaptationList}/>
 					</PageHeader>
 				)}

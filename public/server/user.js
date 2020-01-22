@@ -6,19 +6,44 @@ function getManagerTypes(){
 	}
 }
 
+// вычисляем руководителей для отправки уведомлений, учитываю лесенку по иерархии
+function getNextManagerTypes(curOrderNum, nextOrderNum) {
+	return XQuery("sql: \n\
+		select \n\
+			ccabts.boss_type_id \n\
+		from \n\
+			cc_adaptation_boss_types ccabts \n\
+		inner join boss_types bts on bts.id = ccabts.boss_type_id \n\
+		where \n\
+			ccabts.order_number <= " + nextOrderNum + " \n\
+			and ccabts.order_number <> " + curOrderNum + " \n\
+	");
+}
+
+// вычисляем руководителей для отправки уведомлений, учитываю лесенку по иерархии
+function getPrevManagerTypes(nextOrderNum) {
+	return XQuery("sql: \n\
+		select \n\
+			ccabts.boss_type_id \n\
+		from \n\
+			cc_adaptation_boss_types ccabts \n\
+		inner join boss_types bts on bts.id = ccabts.boss_type_id \n\
+		where \n\
+			ccabts.order_number < " + nextOrderNum + " \n\
+	");
+}
+
 function getById(id){
 	return ArrayOptFirstElem(XQuery("for $el in collaborators where $el/id = " + id + " return $el"));
 }
 
 function getRole(userId, crId){
-	var q = ArrayOptFirstElem(XQuery('for $el in career_reserves where $el/id = ' + crId + ' and $el/person_id = ' + userId + ' and $el/status = \'active\' return $el'));
+	var q = ArrayOptFirstElem(XQuery('for $el in career_reserves where $el/person_id = ' + userId + ' and $el/status = \'active\' return $el'));
 	if (q != undefined) {
 		var pdoc = OpenDoc(UrlFromDocID(Int(q.person_id)));
 		var isAdaptation = ArrayOptFind(pdoc.TopElem.custom_elems, 'This.name == \'is_adaptation\'');
-		if (isAdaptation != undefined){
-			if (isAdaptation.value == 'true') {
-				return getManagerTypes().user;
-			}
+		if (isAdaptation != undefined && isAdaptation.value == 'true'){
+			return getManagerTypes().user;
 		}
 	}
 
@@ -34,6 +59,22 @@ function getRole(userId, crId){
 	if (udoc.TopElem.access.access_role == 'admin') {
 		return String(udoc.TopElem.access.access_role);
 	}
+}
+
+function getRoleRecordByUserId(userId, crId) {
+	var uroleName = getRole(userId, crId);
+
+	return ArrayOptFirstElem(XQuery("sql: \n\
+		select \n\
+			ccabts.*, \n\
+			bts.code user_role, \n\
+			ccabts.title user_role_title \n\
+		from \n\
+			cc_adaptation_boss_types ccabts \n\
+		inner join boss_types bts on bts.id = ccabts.boss_type_id \n\
+		where \n\
+			bts.code = '" + uroleName + "' \n\
+	"));
 }
 
 function getActionsByRole(role, stepId){
