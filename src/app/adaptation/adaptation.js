@@ -314,7 +314,7 @@ class AdaptationView extends Component {
 						className='adaptation__tasks'
 						title='Мои задачи'
 						extra={
-							meta.allow_edit_tasks ? (
+							meta.allow_add_tasks ? (
 								<Button className='adaptation__tasks-add' type='primary' ghost onClick={this.handleToggleTaskModal}>
 									Добавить задачу
 								</Button>

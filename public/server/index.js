@@ -1,10 +1,13 @@
 <%//Server.Execute(AppDirectoryPath() + '/wt/web/include/access_init.html');
-//curUserID = 6719948502038810952; // Volk
+//curUserID = 6651664745809729528; // Volk
 //curUserID = 6719948317677868197 // Zayts
 //curUserID = 6719948498605842349; //Markin
 //curUserID = 6711785032659205612; //Me
 //curUserID = 6719948520442319663; //Kazina
+
+//prod
 //curUserID = 6605152973250176182; //Levakov
+///curUserID = 6605153029051275340; //Zayats
 
 var Adaptation = OpenCodeLib('x-local://wt/web/vsk/portal/adaptation/server/adapt.js');
 DropFormsCache('x-local://wt/web/vsk/portal/adaptation/server/adapt.js');
@@ -17,6 +20,81 @@ DropFormsCache('x-local://wt/web/vsk/portal/adaptation/server/utils.js');
 
 var User = OpenCodeLib('x-local://wt/web/vsk/portal/adaptation/server/user.js');
 DropFormsCache('x-local://wt/web/vsk/portal/adaptation/server/user.js');
+
+
+function isUser(crdoc, userRole){
+	return ((crdoc.TopElem.person_id == curUserID) || (userRole == 'admin'));
+}
+
+function isCuratorF(userRole){
+	var btypes = User.getManagerTypes();
+	return (userRole == btypes.curator || (userRole == 'admin'))
+}
+
+function isManager(userRole){
+	var btypes = User.getManagerTypes();
+	return (userRole == btypes.manager || (userRole == 'admin'))
+}
+
+function _getMeta(crdoc){
+
+	function isAlowEditTasks(curStep, userRole){
+		return (Int(curStep.object_id) == curUserID || userRole == 'admin');
+	}
+
+	function isEditAdaptation(_crDoc, _curStep) {
+		var lst = Adaptation.getLastMainStep();
+		var lstm = Adaptation.getLastStepByMainStepId(_crDoc.DocID, _curStep.main_step_id);
+
+		if (lstm == undefined) {
+			return true;
+		}
+
+		if ((_curStep.main_step == lst.order_number && _curStep.order_number == lstm.order_number)
+			|| (lstm.order_number == _curStep.order_number)
+		) {
+			return false;
+		}
+		return true;
+	}
+
+	//alert('_1');
+	var currentStep = Adaptation.getCurrentStep(crdoc.DocID);
+	//alert('_2');
+	//alert('curUserID: ' + curUserID);
+	//alert('crdoc.DocID: ' + crdoc.DocID);
+	var urole = User.getRole(curUserID, crdoc.DocID);
+	//alert('urole: ' + urole);
+	//alert('_3');
+	var uactions = User.getActionsByRole(urole, currentStep.step_id);
+	//alert('uactions:' + tools.object_to_text(uactions, 'json'));
+	//alert('_5');
+	var isEditAdapt = isEditAdaptation(crdoc, currentStep);
+	//alert('_6');
+	var isEdit = isAlowEditTasks(currentStep, urole);
+	//alert('_7');
+	var ats = Adaptation.getAssessments();
+	//alert('_9');
+	var curMainStepNumber = currentStep.main_step;
+
+	var _isUser = isUser(crdoc, urole);
+	var _isManager = isManager(urole);
+	//alert('_10');
+
+	return {
+		actions: uactions,
+		assessments: ats,
+		is_show_assessments: isEdit && curMainStepNumber > 0,
+		allow_edit_target: isEdit && isEditAdapt && curMainStepNumber == 0, // цель
+		allow_edit_expected_result: isEdit && isEditAdapt && curMainStepNumber == 0, // ожидаемый результат
+		allow_edit_achieved_result: isEdit && isEditAdapt && curMainStepNumber > 0 && _isUser, // Достигнутый результат
+		allow_edit_tasks: isEdit && isEditAdapt,
+		allow_add_tasks: isEdit && isEditAdapt && curMainStepNumber == 0,
+		allow_remove_tasks: isEdit && isEditAdapt && curMainStepNumber == 0,
+		allow_edit_collaborator_assessment: isEditAdapt && (isEdit && curMainStepNumber > 0 && _isUser),
+		allow_edit_manager_assessment: isEditAdapt && (isEdit && curMainStepNumber > 0 && _isManager)
+	}
+}
 
 
 function get_Adaptations(queryObjects){
@@ -51,91 +129,15 @@ function get_Adaptations(queryObjects){
 		");
 	}
 
-	function isAlowEditTasks(curStep, userRole){
-		return (Int(curStep.object_id) == curUserID || userRole == 'admin');
-	}
-
-	function isUser(crdoc, userRole){
-		return ((crdoc.TopElem.person_id == curUserID) || (userRole == 'admin'));
-	}
-
-	function isManager(userRole){
-		var btypes = User.getManagerTypes();
-		return (userRole == btypes.manager || (userRole == 'admin'))
-	}
-
-	function isEditAdaptation(_crDoc, _curStep) {
-		var lst = Adaptation.getLastMainStep();
-		var lstm = Adaptation.getLastStepByMainStepId(_crDoc.DocID, _curStep.main_step_id);
-
-		/*alert('_crDoc.DocID:' + Int(_crDoc.DocID));
-		alert('_curStep.main_step:' + Int(_curStep.main_step));
-		alert('_curStep.main_step_id:' + Int(_curStep.main_step_id));
-		alert(tools.object_to_text(lstm, 'json'));
-			
-		//var a = lstm.order_number == _curStep.order_number;
-		alert(1);
-		alert('lstm.order_number: ' + lstm.order_number);
-		alert(2);
-		alert('_curStep.order_number: ' + _curStep.order_number);
-		alert(3);
-		alert('000000');
-*/
-		if (lstm == undefined) {
-			return true;
-		}
-
-		if ((_curStep.main_step == lst.order_number && _curStep.order_number == lstm.order_number)
-			|| (lstm.order_number == _curStep.order_number)
-		) {
-			return false;
-		}
-		return true;
-	}
-
-	function toResponse(crdoc){
-		//alert('_1');
-		var currentStep = Adaptation.getCurrentStep(crdoc.DocID);
-		//alert('_2');
-		var urole = User.getRole(curUserID, crdoc.DocID);
-		//alert('_3');
-		var uactions = User.getActionsByRole(urole, currentStep.step_id);
-		//alert('_4');
-
-		var data = Adaptation.newObject(crdoc);
-		//alert('_5');
-		var isEditAdapt = isEditAdaptation(crdoc, currentStep);
-		//alert('_6');
-		var isEdit = isAlowEditTasks(currentStep, urole);
-		//alert('_7');
-		var ats = Adaptation.getAssessments();
-		//alert('_8');
-		var isStep = OptInt(currentStep.main_step) > 0;
-		//alert('_9');
-		var isUserOrManager = (isUser(crdoc, urole) || isManager(urole));
-		//alert('_10');
-
-		data.meta = {
-			actions: uactions,
-			assessments: ats,
-			is_show_assessments: isEdit && isStep && isUserOrManager,
-			allow_edit_target: isEditAdapt && OptInt(currentStep.main_step) == 0 && isEdit && isUserOrManager, // цель
-			allow_edit_expected_result: isEditAdapt && OptInt(currentStep.main_step) == 0 && isEdit && isUserOrManager, // ожидаемый результат
-			allow_edit_achieved_result: isEditAdapt && isEdit && isStep && isUserOrManager, // Достигнутый результат
-			allow_edit_tasks: isEditAdapt && isEdit,
-			allow_edit_collaborator_assessment: isEditAdapt && (isEdit && isStep && isUser(crdoc, urole)),
-			allow_edit_manager_assessment: isEditAdapt && (isEdit && isStep && isManager(urole))
-		}
-		return data;
-	}
-
 	var id = queryObjects.HasProperty('id') ? Trim(queryObjects.id) : undefined;
 	if (id != undefined){
 		var cr = Adaptation.getById(id);
 		if (cr != undefined){
 			crdoc = OpenDoc(UrlFromDocID(Int(cr.id)));
 			if (Adaptation.isAccessToView(curUserID, crdoc)) {
-				var data = toResponse(crdoc);
+				var data = Adaptation.newObject(crdoc);
+				var meta = _getMeta(crdoc);
+				data.meta = meta;
 				return Utils.toJSON(Utils.setSuccess(data));
 			} else {
 				return Utils.toJSON(Utils.setError('You don\'t have permissions to this adaptation'));
@@ -269,6 +271,8 @@ function post_changeStep(queryObjects){
 
 	var currentStep = Adaptation.getCurrentStep(crid);
 	var personFromRole = User.getRole(currentStep.object_id, crid);
+
+
 	/*alert('personFromRole: ' + personFromRole);
 	alert('currentStep.step_id: ' + currentStep.step_id);
 	alert('action: ' + action);*/
@@ -302,6 +306,50 @@ function post_changeStep(queryObjects){
 		return Utils.toJSON(Utils.setError('Next step or next user not found'));
 	}
 
+	// если этап(общий) последний и не заполнены оценки рук-ля / сотрудника,
+	// и если сотрудник пытается отправить дальше по этапу (верх по лесенке), то возвращаем ошибку
+	var lst = Adaptation.getLastMainStep();
+	var crDoc = OpenDoc(UrlFromDocID(Int(crid)));
+	if (currentStep.main_step == lst.order_number && (OptInt(processStep.next_step_order_number) > OptInt(currentStep.order_number))) {
+		//alert('11111');
+		var assessmentsCount = ArrayOptFirstElem(XQuery("sql: \n\
+			select \n\
+				top 1 \n\
+				count(ccat.id) over() total, \n\
+				(select count(*) \n\
+				from cc_adaptation_tasks \n\
+				where \n\
+					ccat.career_reserve_id = " + crid + " \n\
+					and collaborator_assessment is not null \n\
+				) collaborator_assessment, \n\
+				(select count(*) \n\
+				from cc_adaptation_tasks \n\
+				where \n\
+					ccat.career_reserve_id = " + crid + " \n\
+					and manager_assessment is not null \n\
+				) manager_assessment \n\
+			from \n\
+				cc_adaptation_tasks ccat \n\
+			where ccat.career_reserve_id = " + crid + " \n\
+		"));
+		if (assessmentsCount != undefined) {
+			//alert('222222');
+			var c =
+				isManager(urole) ?
+					OptInt(assessmentsCount.manager_assessment) :
+					(isUser(crDoc, urole) ?
+						OptInt(assessmentsCount.collaborator_assessment) :
+						OptInt(assessmentsCount.total));
+			//alert('c:' + c);
+			//alert('OptInt(assessmentsCount.total): ' + OptInt(assessmentsCount.total));
+			if (OptInt(assessmentsCount.total) > c) {
+				//alert('33333');
+				return Utils.toJSON(Utils.setError('Проставьте в задачах ваши оценки пожалуйста.'));
+			}
+		}
+	}
+
+
 	var currentUserId = currentStep.object_id;
 	//var nextUserId = Adaptation.getNextUserId(crid, processStep.next_role);
 	
@@ -326,17 +374,24 @@ function post_changeStep(queryObjects){
 	var curUserRole = User.getRoleRecordByUserId(currentUserId, crid);
 	var nextUserRole = User.getRoleRecordByUserId(nextUserId, crid);
 
+	//alert('curUserRole: ' + tools.object_to_text(curUserRole, 'json'));
+	//alert('nextUserRole: ' + tools.object_to_text(nextUserRole, 'json'));
+
 	if (curUserRole != undefined && nextUserRole != undefined) {
+		//alert(1);
 		var managerTypes = [];
 		// если порядковый номер следующего этапа больше текущего, значит лесенка вверх
 		if (OptInt(processStep.next_step_order_number) > OptInt(currentStep.order_number)) {
+			//alert(2)
 			managerTypes = User.getNextManagerTypes(OptInt(curUserRole.order_number), OptInt(nextUserRole.order_number));
 		} else {
+			//alert(3)
 			managerTypes = User.getPrevManagerTypes(OptInt(nextUserRole.order_number));
 		}
 
+		//alert('ArrayCount(managerTypes):' + ArrayCount(managerTypes));
 		var _tutors = [];
-		var crDoc = OpenDoc(UrlFromDocID(Int(crid)));
+		//var crDoc = OpenDoc(UrlFromDocID(Int(crid)));
 		for (mt in managerTypes) {
 			for (el in crDoc.TopElem.tutors) {
 				if (mt.boss_type_id == el.boss_type_id) {
@@ -345,13 +400,18 @@ function post_changeStep(queryObjects){
 			}
 		}
 
+		// Сотрудник, кто прохоит адаптацию должен всегда получать уведомления, если не он отправляет на согласование
+		if (Int(crDoc.TopElem.person_id) != Int(currentUserId)) {
+			_tutors.push(crDoc.TopElem.person_id);
+		}
 
+		//alert('ArrayCount(_tutors):' + ArrayCount(_tutors));
 		var curUserDoc = OpenDoc(UrlFromDocID(Int(currentUserId)));
 		var nextUserDoc = OpenDoc(UrlFromDocID(Int(nextUserId)));
 		var _person = crDoc.TopElem.person_id.ForeignElem;
 
 		var objToNotificate = tools.object_to_text({
-			subject: ('Адаптация сотрудника ' + Utils.splitFullname(String(_person.fullname)) + '. ' + String(nextStep.TopElem.main_step_id.ForeignElem.description) + ' / ' + String(processStep.step_title)),
+			subject: ('Адаптация сотрудника ' + String(_person.fullname) + '. ' + String(nextStep.TopElem.main_step_id.ForeignElem.description) + ' / ' + String(processStep.step_title)),
 			crid: OptInt(crid),
 			stepTitle: String(processStep.step_title),
 			from: {

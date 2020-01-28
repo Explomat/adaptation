@@ -79,13 +79,13 @@ class Task extends Component {
 						</div>
 					)}
 				</td>
-				{meta.allow_edit_tasks && (<td>
+				<td>
 					<span>
-						<Icon className='task__icon' type='edit' onClick={this.handleToggleModal}/>
-						<Divider type='vertical' />
-						<Icon className='task__icon' type='delete' onClick={() => removeTask(id)}/>
+						{meta.allow_edit_tasks && <Icon className='task__icon' type='edit' onClick={this.handleToggleModal}/>}
+						{meta.allow_edit_tasks && meta.allow_remove_tasks && <Divider type='vertical' />}
+						{meta.allow_remove_tasks && <Icon className='task__icon' type='delete' onClick={() => removeTask(id)}/>}
 					</span>
-				</td>)}
+				</td>
 				{isShowModal && <TaskForm
 					title='Редактирование'
 					onCommit={this.handleUpdate}

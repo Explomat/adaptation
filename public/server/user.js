@@ -88,9 +88,12 @@ function getActionsByRole(role, stepId){
 		inner join cc_adaptation_operations ans on ans.id = ars.operation_id \n\
 		where \n\
 			ars.role = '" + role + "'";
+		
 	if (stepId != undefined){
 		strq = strq + " and step = " + Int(stepId)
 	}
+
+	strq = strq + " order by ans.title"
 
 	var q = XQuery("sql: " + strq);
 	for (el in q){
