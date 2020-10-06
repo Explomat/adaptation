@@ -1,8 +1,8 @@
 export function pureUrl(){
 	//return window.location.protocol + '//192.168.73.37';
-	/*return process.env.NODE_ENV === 'production' ?
-			window.location.protocol + '//e-learning.vsk.ru' : window.location.protocol + '//192.168.73.37';*/
-	return `${window.location.protocol}//e-learning.vsk.ru`;
+	return process.env.NODE_ENV === 'production' ?
+			(window.location.protocol + '//e-learning.vsk.ru:' + window.location.port) : window.location.protocol + '//192.168.73.37';
+	//return `${window.location.protocol}//e-learning.vsk.ru`;
 }
 
 export function createBaseUrl(action_name, params = {}){
@@ -10,8 +10,8 @@ export function createBaseUrl(action_name, params = {}){
 
 	const baseUrl = pureUrl() + '/custom_web_template.html';
 
-	window.routerId = '6727531844004172765';
-	window.serverId = '6727526001436286031';
+	window.routerId = process.env.NODE_ENV === 'production' ? '6789943271516957593' : '6727531844004172765'; // 6727531844004172765 - test, 6789943271516957593 - prod
+	window.serverId = process.env.NODE_ENV === 'production' ? '6727526001436286031' : '6727526001436286031'; // 6727526001436286031 - test, 6727526001436286031 - prod
 	const url = new URL(`${baseUrl}?object_id=${window.routerId}&server_id=${window.serverId}&action_name=${action_name}&r=${(new Date()).getTime()}`);
 	Object.keys(params).forEach(key => url.searchParams.append(key, params[key]));
 	return url.href;

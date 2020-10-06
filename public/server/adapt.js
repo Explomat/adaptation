@@ -82,7 +82,7 @@ function getLastStepByMainStepId(crid, mainStepId){
 		where \n\
 			ca.career_reserve_id = " + crid + " \n\
 			and ams.id = " + mainStepId + " \n\
-	"))
+	"));
 }
 
 function getCurrentStep(crid){
@@ -190,7 +190,7 @@ function isAccessToView(userId, doc, crid){
 	var User = OpenCodeLib('x-local://wt/web/vsk/portal/adaptation/server/user.js');
 	DropFormsCache('x-local://wt/web/vsk/portal/adaptation/server/user.js');
 	
-	var urole = User.getRole(userId, doc.DocID);
+	var urole = User.getRole(userId, doc.DocID, doc);
 	return (
 		(doc.TopElem.person_id == userId) ||
 		(ArrayOptFind(doc.TopElem.tutors, 'This.person_id == ' + userId) != undefined) ||
@@ -220,7 +220,8 @@ function getCurators(userId, userRole){
 					crt.career_reserve_id, \n\
 					crt.tutor_id \n\
 				from career_reserve_tutors crt \n\
-				where (crt.tutor_id = " + userId + " or 'admin' = '" + userRole + "') \n\
+				where (crt.tutor_id = " + userId + ") \n\
+				--where (crt.tutor_id = " + userId + " or 'admin' = '" + userRole + "') \n\
 			) c on c.career_reserve_id = crs.id \n\
 			inner join career_reserve cr on cr.id = crs.id \n\
 			cross apply cr.data.nodes('/career_reserve/tutors/tutor') as t(p) \n\

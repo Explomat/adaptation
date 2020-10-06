@@ -17,7 +17,7 @@ const UserDescription = ({ ...props }) => (
 	<Col>
 		<div className='description'>
 			<div className='term'>{props.children}</div>
-			<a className='detail' target='__blank' href={pureUrl() + `/view_doc.html?mode=collaborator&object_id=${props.person_id}`}>{props.person_fullname}</a>
+			<a className='detail' target='__blank' href={`/view_doc.html?mode=collaborator&object_id=${props.person_id}`}>{props.person_fullname}</a>
 		</div>
 	</Col>
 );

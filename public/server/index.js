@@ -63,7 +63,7 @@ function _getMeta(crdoc){
 	//alert('_2');
 	//alert('curUserID: ' + curUserID);
 	//alert('crdoc.DocID: ' + crdoc.DocID);
-	var urole = User.getRole(curUserID, crdoc.DocID);
+	var urole = User.getRole(curUserID, crdoc.DocID, crdoc);
 	//alert('urole: ' + urole);
 	//alert('_3');
 	var uactions = User.getActionsByRole(urole, currentStep.step_id);
@@ -99,7 +99,7 @@ function _getMeta(crdoc){
 
 function get_Adaptations(queryObjects){
 	function getTutorsCards(tId, tRole){
-		return XQuery("sql: \n\
+		var q = "sql: \n\
 			select \n\
 				c.id, \n\
 				c.name, \n\
@@ -126,7 +126,10 @@ function get_Adaptations(queryObjects){
 			where \n\
 				c.tutor_id = " + Int(tId) + " \n\
 				and bt.code = '" + tRole + "' \n\
-		");
+		";
+
+		//alert(q);
+		return XQuery(q);
 	}
 
 	var id = queryObjects.HasProperty('id') ? Trim(queryObjects.id) : undefined;

@@ -37,28 +37,44 @@ function getById(id){
 	return ArrayOptFirstElem(XQuery("for $el in collaborators where $el/id = " + id + " return $el"));
 }
 
-function getRole(userId, crId){
-	var q = ArrayOptFirstElem(XQuery('for $el in career_reserves where $el/person_id = ' + userId + ' and $el/status = \'active\' return $el'));
-	if (q != undefined) {
-		var pdoc = OpenDoc(UrlFromDocID(Int(q.person_id)));
-		var isAdaptation = ArrayOptFind(pdoc.TopElem.custom_elems, 'This.name == \'is_adaptation\'');
-		if (isAdaptation != undefined && isAdaptation.value == 'true'){
-			return getManagerTypes().user;
-		}
-	}
+function getRole(userId, crId, crdoc){
+	var crDoc = null;
 
-	if (crId != undefined){
-		var crdoc = OpenDoc(UrlFromDocID(Int(crId)));
-		var tutor = ArrayOptFind(crdoc.TopElem.tutors, 'This.person_id == ' + userId);
-		if (tutor != undefined) {
-			return String(tutor.boss_type_id.OptForeignElem.code);
+	try {
+		if (crdoc != undefined) {
+			crDoc = crdoc;
+		} else {
+			crDoc = OpenDoc(UrlFromDocID(Int(crId)));
 		}
-	}
+
+		if (userId == crDoc.TopElem.person_id) {
+			var q = ArrayOptFirstElem(XQuery('for $el in career_reserves where $el/person_id = ' + userId + ' and $el/status = \'active\' return $el'));
+			if (q != undefined) {
+				var pdoc = OpenDoc(UrlFromDocID(Int(q.person_id)));
+				var isAdaptation = ArrayOptFind(pdoc.TopElem.custom_elems, 'This.name == \'is_adaptation\'');
+				if (isAdaptation != undefined && isAdaptation.value == 'true'){
+					return getManagerTypes().user;
+				}
+			}
+		}
+	} catch(e) {}
+
+
+	try {
+		if (crDoc != null){
+			var tutor = ArrayOptFind(crDoc.TopElem.tutors, 'This.person_id == ' + userId);
+			if (tutor != undefined) {
+				return String(tutor.boss_type_id.OptForeignElem.code);
+			}
+		}
+	} catch(e) {}
 
 	var udoc = OpenDoc(UrlFromDocID(Int(userId)));
 	if (udoc.TopElem.access.access_role == 'admin') {
 		return String(udoc.TopElem.access.access_role);
 	}
+
+	return '';
 }
 
 function getRoleRecordByUserId(userId, crId) {
