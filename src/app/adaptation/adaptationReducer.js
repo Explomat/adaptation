@@ -26,7 +26,9 @@ const tasksReducer = (state = [], action) => {
 
 const adaptationReducer = (state = {
 	adaptationList: [],
-	card: {},
+	card: {
+		tasks: []
+	},
 	mainSteps: [],
 	meta: {},
 	steps: [],

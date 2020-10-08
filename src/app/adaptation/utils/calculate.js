@@ -1,4 +1,4 @@
-export function calculatePercent(scales, rules) {
+export function calculatePercent(scales = [], rules = []) {
 	const _percents = scales
 		.filter(s => s !== '')
 		.map(s =>{
@@ -21,7 +21,7 @@ export function calculatePercent(scales, rules) {
 	return computeScaleByPercent(average, rules);
 }
 
-function computeScaleByPercent(percent, rules) {
+function computeScaleByPercent(percent = null, rules = []) {
 	const r = Math.round(parseInt(percent, 10) / 10) * 10;
 
 	const s = rules.findIndex(rule => {

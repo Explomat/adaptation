@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
 import { withRouter } from 'react-router';
-import { List, Icon, Button, Modal, Input, PageHeader, Row, Col, Steps, Card, Tag } from 'antd';
+import { Spin, List, Icon, Button, Modal, Input, PageHeader, Row, Col, Steps, Card, Tag } from 'antd';
 import Task from './task';
 import TaskForm from './taskForm';
 import { pureUrl } from '../../utils/request';
@@ -300,74 +300,73 @@ class AdaptationView extends Component {
 
 	render() {
 		const { card, meta, ui } = this.props;
-		if (ui.isLoading){
-			return null;
-		}
 		const { isShowModalTask } = this.state;
 		const { isShowModalComment, comment } = this.state;
 		return (
-			<div className='adaptation'>
-				{ this.renderHeader() }
-				<div className='adaptation__body'>
-					{ this.renderMainSteps() }
-					<Card
-						className='adaptation__tasks'
-						title='Мои задачи'
-						extra={
-							meta.allow_add_tasks ? (
-								<Button className='adaptation__tasks-add' type='primary' ghost onClick={this.handleToggleTaskModal}>
-									Добавить задачу
-								</Button>
-							) : null
-						}
-						actions={
-							meta.actions && meta.actions.map(a => {
-								return (
-									<Button
-											key={a.name}
-											disabled={card.tasks.length === 0}
-											className='adaptation__tasks-actions'
-											type='primary'
-											onClick={() => this.handeAction(a)}
-									>
-										{a.title}
+			<Spin spinning={ui.isLoading}>
+				<div className='adaptation'>
+					{ this.renderHeader() }
+					<div className='adaptation__body'>
+						{ this.renderMainSteps() }
+						<Card
+							className='adaptation__tasks'
+							title='Мои задачи'
+							extra={
+								meta.allow_add_tasks ? (
+									<Button className='adaptation__tasks-add' type='primary' ghost onClick={this.handleToggleTaskModal}>
+										Добавить задачу
 									</Button>
-								);
-							})
-						}
-					>
-						{this.renderTasks()}
-					</Card>
-					{isShowModalTask && <TaskForm
-						title='Новая задача'
-						onCommit={this.handleAddTask}
-						onCancel={this.handleToggleTaskModal}
-						meta={meta}
-					/>}
-					<Modal
-						title='Сообщение'
-						visible={isShowModalComment}
-						onOk={() => this.handleChangeStep(true)}
-						onCancel={this.handleToggleCommentModal}
-						footer={[
-							<Button key='submit' onClick={() => this.handleChangeStep(true)}>
-								Ok
-							</Button>,
-							<Button key='cancel' onClick={this.handleToggleCommentModal}>
-								Отмена
-							</Button>,
-							<Button key='submit_wthout_comment' onClick={this.handleChangeStep}>
-								Отправить без комментария
-							</Button>
-						]}
-					>
-						<Input.TextArea placeholder='Описание' value={comment} autosize={{ minRows: 3}} onChange={this.handleChangeComment}/>
-					</Modal>
+								) : null
+							}
+							actions={
+								meta.actions && meta.actions.map(a => {
+									return (
+										<Button
+												key={a.name}
+												disabled={card.tasks.length === 0}
+												className='adaptation__tasks-actions'
+												type='primary'
+												onClick={() => this.handeAction(a)}
+										>
+											{a.title}
+										</Button>
+									);
+								})
+							}
+						>
+							{this.renderTasks()}
+						</Card>
+						{isShowModalTask && <TaskForm
+							title='Новая задача'
+							onCommit={this.handleAddTask}
+							onCancel={this.handleToggleTaskModal}
+							meta={meta}
+						/>}
+						<Modal
+							title='Сообщение'
+							visible={isShowModalComment}
+							onOk={() => this.handleChangeStep(true)}
+							onCancel={this.handleToggleCommentModal}
+							footer={[
+								<Button key='submit' onClick={() => this.handleChangeStep(true)}>
+									Ok
+								</Button>,
+								<Button key='cancel' onClick={this.handleToggleCommentModal}>
+									Отмена
+								</Button>,
+								<Button key='submit_wthout_comment' onClick={this.handleChangeStep}>
+									Отправить без комментария
+								</Button>
+							]}
+						>
+							<Input.TextArea placeholder='Описание' value={comment} autosize={{ minRows: 3}} onChange={this.handleChangeComment}/>
+						</Modal>
+					</div>
+					<div className='adaptation__footer'>
+						{this.renderHistory()}
+					</div>
 				</div>
-				<div className='adaptation__footer'>
-					{this.renderHistory()}
-				</div>
-			</div>
+			</Spin>
 		);
 	}
 }

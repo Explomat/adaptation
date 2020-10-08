@@ -27,15 +27,17 @@ class Curator extends Component {
 	renderTutorRoles(){
 		const { tutorRoles, currentTutorRole } = this.props;
 
-		return (
-			<Select defaultValue={currentTutorRole} onChange={this.handleChangeTutorRole}>
-				{tutorRoles && tutorRoles.map(t => {
-					return (
-						<Select.Option key={t.code} value={t.code}>{t.name}</Select.Option>
-					);
-				})}
-			</Select>
-		);
+		if (tutorRoles) {
+			return (
+				<Select defaultValue={currentTutorRole} onChange={this.handleChangeTutorRole}>
+					{tutorRoles.map(t => {
+						return (
+							<Select.Option key={t.code} value={t.code}>{t.name}</Select.Option>
+						);
+					})}
+				</Select>
+			);
+		}
 	}
 
 	render() {
@@ -45,10 +47,12 @@ class Curator extends Component {
 		}
 		return (
 			<div className='curators'>
-				{history.location.pathname === '/curators' ? (
-					<Card
-						/*extra={this.renderTutorRoles()}*/
-					>
+				<Card>
+					{this.renderTutorRoles()}
+					<AdaptationList list={adaptationList}/>
+				</Card>
+				{/*history.location.pathname === '/curators' ? (
+					<Card>
 						{this.renderTutorRoles()}
 						<AdaptationList list={adaptationList}/>
 					</Card>
@@ -60,7 +64,7 @@ class Curator extends Component {
 						<div className='curators__tutor-header'>Сотрудники на адаптации</div>
 						<AdaptationList list={adaptationList}/>
 					</PageHeader>
-				)}
+				)*/}
 			</div>
 		);
 	}

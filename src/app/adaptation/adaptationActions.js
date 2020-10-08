@@ -146,6 +146,8 @@ export function removeTask(id){
 
 export function changeStep(action, comment){
 	return (dispatch, getState) => {
+		dispatch(loading(true));
+
 		const state = getState();
 		const cardId = state.adaptation.card.id;
 
@@ -160,8 +162,10 @@ export function changeStep(action, comment){
 					throw d;
 				}
 				dispatch(getAdaptation(cardId));
+				dispatch(loading(false));
 			})
 			.catch(e => {
+				dispatch(loading(false));
 				console.error(e.message);
 				dispatch(error(e.message));
 			});
